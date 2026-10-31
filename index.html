@@ -18,7 +18,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Pirata+One&display=swap">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 <style>
 /* One-screen app: map pinned on top, a live next-stop bar, a scrolling trail of stop cards below. Single dark look for walking at night. */
 :root {
@@ -87,7 +87,14 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--candle); outlin
 /* ---------- map ---------- */
 .map-wrap { position: relative; flex: 0 0 42%; min-height: 220px; transition: flex-basis .25s ease; }
 .app.map-big .map-wrap { flex-basis: 68%; }
-#map { position: absolute; inset: 0; background: #1b1620; }
+#map { position: absolute; inset: 0; background: #efebe3; }
+.maplibregl-map { font-family: var(--font-body); }
+.maplibregl-ctrl-attrib { font-size: 10px; }
+.hw-pop .maplibregl-popup-content {
+  background: var(--card-2); color: var(--bone); border-radius: 9px; padding: 6px 10px;
+  font: 700 13px/1.2 var(--font-body); box-shadow: 0 4px 14px rgba(0,0,0,.35);
+}
+.hw-pop.maplibregl-popup-anchor-bottom .maplibregl-popup-tip { border-top-color: var(--card-2); }
 .map-btns {
   position: absolute; z-index: 500; right: max(10px, env(safe-area-inset-right, 0px)); bottom: 26px;
   display: flex; flex-direction: column; gap: 8px;
@@ -109,23 +116,15 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--candle); outlin
 .legend i { width: 14px; height: 4px; border-radius: 2px; display: inline-block; }
 .map-note {
   position: absolute; z-index: 500; left: max(10px, env(safe-area-inset-left, 0px)); top: 10px; right: 66px;
-  font-size: 12px; color: var(--mist); pointer-events: none;
+  font-size: 12px; color: var(--bone); pointer-events: none;
 }
-.leaflet-container { font-family: var(--font-body); background: #1b1620; }
-.leaflet-tile-pane { filter: invert(1) hue-rotate(185deg) brightness(.92) contrast(.88) saturate(.55); }
-.leaflet-control-attribution { background: rgba(22,17,27,.8) !important; color: var(--mist) !important; font-size: 10px; }
-.leaflet-control-attribution a { color: var(--mist) !important; }
-.leaflet-tooltip.hw-tip {
-  background: var(--card-2); color: var(--bone); border: 1px solid var(--line); border-radius: 8px;
-  font: 700 13px/1.2 var(--font-body); padding: 5px 8px; box-shadow: 0 4px 14px rgba(0,0,0,.45);
-}
-.leaflet-tooltip-top.hw-tip::before { border-top-color: var(--line); }
+.map-note:not(:empty) { background: rgba(22,17,27,.85); border-radius: 8px; padding: 5px 9px; width: max-content; max-width: calc(100% - 76px); }
 
 /* markers */
 .pin {
   position: relative; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
   font: 700 13px/1 var(--font-body); color: var(--pumpkin-ink); background: var(--pumpkin);
-  border: 2px solid var(--night); box-shadow: 0 2px 8px rgba(0,0,0,.55);
+  border: 2px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,.35);
   font-variant-numeric: tabular-nums;
 }
 .pin.leg2 { background: var(--violet); color: var(--violet-ink); }
@@ -317,8 +316,8 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
     <div id="map" role="region" aria-label="Map of the walk"></div>
     <div class="map-note" id="map-note"></div>
     <div class="legend" aria-hidden="true">
-      <span><i style="background:var(--pumpkin)"></i>Before the park</span>
-      <span><i style="background:var(--violet)"></i>After the park</span>
+      <span><i style="background:#e8751a"></i>Before the park</span>
+      <span><i style="background:#8456ee"></i>After the park</span>
     </div>
     <div class="map-btns">
       <button type="button" class="map-btn" id="btn-me" aria-pressed="false" aria-label="Follow my location">
@@ -408,7 +407,7 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
           <li>Displays can change on the night, so keep an eye out on the streets in between.</li>
         </ul>
         <button type="button" class="linkbtn" id="reset">Clear all ticks</button>
-        <p class="small">Displays from Claire &amp; The City’s 2026 guide, Londonist’s 22 October walk and Instagram walk posts. Park details from Kensington’s Halloween FAQ. Map © OpenStreetMap contributors. Walking routes from FOSSGIS / OSRM.</p>
+        <p class="small">Displays from Claire &amp; The City’s 2026 guide, Londonist’s 22 October walk and Instagram walk posts. Park details from Kensington’s Halloween FAQ. Map © OpenFreeMap, © OpenMapTiles, © OpenStreetMap contributors. Walking routes from FOSSGIS / OSRM.</p>
       </section>
     </div>
   </main>
@@ -425,7 +424,7 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
 </div>
 <div class="toast" id="toast" hidden role="status"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script>
 (function () {
   "use strict";
@@ -600,48 +599,90 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
   $("route2").href = ROUTE2_URL;
 
   /* ---------- map ---------- */
-  var map = null, markers = {}, youMarker = null, youCircle = null, routeBounds = null;
-  if (typeof window.L !== "undefined") {
-    map = L.map("map", { zoomControl: false, attributionControl: true });
-    /* Keyless OpenStreetMap tiles, darkened with a CSS filter on the tile layer only (pins and routes keep their colours). */
-    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 19,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
+  /* Clean street style from OpenFreeMap (no key), drawn by MapLibre. Plain OpenStreetMap tiles are the fallback. */
+  var STYLE_URL = "https://tiles.openfreemap.org/styles/liberty";
+  var FALLBACK_STYLE = {
+    version: 8,
+    sources: { osm: { type: "raster", tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"], tileSize: 256, maxzoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' } },
+    layers: [{ id: "osm", type: "raster", source: "osm" }]
+  };
+  var LINE_COLORS = { leg1: "#e8751a", park: "#3f9a55", leg2: "#8456ee" };
+  var map = null, mapReady = false, markers = {}, youMarker = null, routeBounds = null, popup = null;
+  var routeData = {};
+  function lngLat(p) { return [p.lng, p.lat]; }
+  function pinClass(s, extra) { return "pin " + (s === START ? "start" : legClass(s)) + (extra || ""); }
 
-    markers.start = L.marker([START.lat, START.lng], { icon: pinIcon(START, ""), title: START.name }).addTo(map);
-    markers.start.bindTooltip("Start: " + START.name, { direction: "top", offset: [0, -16], className: "hw-tip" });
-    STOPS.forEach(function (s) {
-      var m = L.marker([s.lat, s.lng], { icon: pinIcon(s, ""), title: s.name, riseOnHover: true }).addTo(map);
-      m.bindTooltip(s.n + " · " + s.name, { direction: "top", offset: [0, -16], className: "hw-tip" });
-      m.on("click", function () {
-        m.openTooltip();
-        if (!$("app").classList.contains("map-big")) scrollToCard(s);
-      });
-      markers[s.id] = m;
+  if (typeof window.maplibregl !== "undefined") {
+    routeBounds = new maplibregl.LngLatBounds(lngLat(START), lngLat(START));
+    STOPS.forEach(function (s) { routeBounds.extend(lngLat(s)); });
+
+    map = new maplibregl.Map({
+      container: "map", style: STYLE_URL, bounds: routeBounds, fitBoundsOptions: { padding: 40 },
+      attributionControl: false, dragRotate: false, pitchWithRotate: false, touchPitch: false, maxZoom: 19
     });
+    map.addControl(new maplibregl.AttributionControl({ compact: true }), "bottom-right");
+    if (map.touchZoomRotate && map.touchZoomRotate.disableRotation) map.touchZoomRotate.disableRotation();
 
-    routeBounds = L.latLngBounds([[START.lat, START.lng]].concat(STOPS.map(function (s) { return [s.lat, s.lng]; })));
-    map.fitBounds(routeBounds, { padding: [28, 28] });
-
-    /* route lines: real walking paths from OpenStreetMap routing, with straight lines until (or unless) they arrive */
-    var lines = {};
-    var drawLine = function (key, latlngs, approx) {
-      if (lines[key]) map.removeLayer(lines[key]);
-      var leg = LEGS[key];
-      lines[key] = L.polyline(latlngs, {
-        color: leg.color, weight: approx ? 3 : 5, opacity: .92, interactive: false,
-        dashArray: (approx || leg.straight) ? "6 8" : null, lineCap: "round", lineJoin: "round"
-      }).addTo(map);
-      lines[key].bringToBack();
+    var styleOk = false, fellBack = false;
+    var useFallback = function () {
+      if (styleOk || fellBack) return;
+      fellBack = true;
+      map.setStyle(FALLBACK_STYLE);
     };
+    map.on("styledata", function () { styleOk = true; });
+    map.on("error", function () { useFallback(); });
+    setTimeout(useFallback, 12000);
+
+    /* pins: a wrapper the map positions, and an inner pin whose look changes */
+    var addPin = function (s, label) {
+      var wrap = document.createElement("div");
+      var pin = document.createElement("div");
+      pin.className = pinClass(s);
+      pin.textContent = s.n;
+      wrap.appendChild(pin);
+      wrap.setAttribute("role", "button");
+      wrap.setAttribute("aria-label", label);
+      wrap.style.cursor = "pointer";
+      var mk = new maplibregl.Marker({ element: wrap }).setLngLat(lngLat(s)).addTo(map);
+      wrap.addEventListener("click", function (ev) {
+        ev.stopPropagation();
+        showLabel(s, label);
+        if (s !== START && !$("app").classList.contains("map-big")) scrollToCard(s);
+      });
+      return { wrap: wrap, pin: pin, mk: mk };
+    };
+    markers.start = addPin(START, "Start: " + START.name);
+    STOPS.forEach(function (s) { markers[s.id] = addPin(s, s.n + " · " + s.name); });
+
+    /* route lines */
+    Object.keys(LEGS).forEach(function (key) {
+      routeData[key] = { coords: LEGS[key].pts.map(lngLat), approx: !LEGS[key].straight };
+    });
+    var addRouteLayers = function () {
+      Object.keys(LEGS).forEach(function (key) {
+        var id = "route-" + key, dashed = !!(LEGS[key].straight || routeData[key].approx);
+        if (map.getLayer(id)) map.removeLayer(id);
+        if (map.getSource(id)) map.removeSource(id);
+        map.addSource(id, { type: "geojson", data: { type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: routeData[key].coords } } });
+        var paint = { "line-color": LINE_COLORS[key], "line-width": dashed ? 3.5 : 6, "line-opacity": 0.9 };
+        if (dashed) paint["line-dasharray"] = [1.4, 1.8];
+        map.addLayer({ id: id, type: "line", source: id, layout: { "line-cap": dashed ? "butt" : "round", "line-join": "round" }, paint: paint });
+      });
+      mapReady = true;
+    };
+    map.on("style.load", function () { try { addRouteLayers(); } catch (e) {} });
+    var updateRoute = function (key, coords) {
+      routeData[key] = { coords: coords, approx: false };
+      if (mapReady) { try { addRouteLayers(); } catch (e) {} }
+    };
+
     Object.keys(LEGS).forEach(function (key) {
       var leg = LEGS[key];
-      drawLine(key, leg.pts.map(function (p) { return [p.lat, p.lng]; }), !leg.straight);
       if (leg.straight) return;
-      var cacheKey = "hw2026-route2-" + key, cached = null;
+      var cacheKey = "hw2026-route3-" + key, cached = null;
       try { cached = JSON.parse(store(cacheKey) || "null"); } catch (e) { cached = null; }
-      if (cached && cached.length > 2) { drawLine(key, cached, false); return; }
+      if (cached && cached.length > 2) { updateRoute(key, cached); return; }
       var coords = leg.pts.map(function (p) { return p.lng.toFixed(6) + "," + p.lat.toFixed(6); }).join(";");
       var url = "https://routing.openstreetmap.de/routed-foot/route/v1/driving/" + coords + "?overview=full&geometries=geojson";
       var ctrl = ("AbortController" in window) ? new AbortController() : null;
@@ -653,8 +694,8 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
         clearTimeout(timer);
         var c = j && j.routes && j.routes[0] && j.routes[0].geometry && j.routes[0].geometry.coordinates;
         if (!c || c.length < 2) throw new Error("no route");
-        var ll = c.map(function (p) { return [+p[1].toFixed(6), +p[0].toFixed(6)]; });
-        drawLine(key, ll, false);
+        var ll = c.map(function (p) { return [+p[0].toFixed(6), +p[1].toFixed(6)]; });
+        updateRoute(key, ll);
         store(cacheKey, JSON.stringify(ll));
       }).catch(function () {
         clearTimeout(timer);
@@ -663,22 +704,23 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
     });
 
     map.on("dragstart", function () { setFollow(false); });
+    map.on("click", function () { if (popup) { popup.remove(); popup = null; } });
   } else {
-    $("map").innerHTML = '<p style="padding:16px;color:#ab9fb6;margin:0">The map couldn’t load. Check your signal and reload. The stop list and Directions buttons still work.</p>';
+    $("map").innerHTML = '<p style="padding:16px;color:#5b5065;margin:0">The map couldn’t load. Check your signal and reload. The stop list and Directions buttons still work.</p>';
     $("btn-fit").hidden = true; $("btn-big").hidden = true;
   }
 
-  function pinIcon(s, extra) {
-    return L.divIcon({
-      className: "", iconSize: [28, 28], iconAnchor: [14, 14],
-      html: '<div class="pin ' + (s === START ? "start" : legClass(s)) + extra + '">' + s.n + "</div>"
-    });
+  function showLabel(s, text) {
+    if (!map) return;
+    if (popup) popup.remove();
+    popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false, offset: 20, anchor: "bottom", className: "hw-pop" })
+      .setLngLat(lngLat(s)).setText(text).addTo(map);
   }
   function focusStop(s) {
     if (!map) return;
     setFollow(false);
-    map.setView([s.lat, s.lng], 17, { animate: true });
-    if (markers[s.id]) setTimeout(function () { markers[s.id].openTooltip(); }, 300);
+    map.flyTo({ center: lngLat(s), zoom: 17, speed: 1.4 });
+    showLabel(s, s.n + " · " + s.name);
   }
   function scrollToCard(s) {
     var el = $("stop-" + s.id);
@@ -688,14 +730,14 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
   $("btn-fit").addEventListener("click", function () {
     if (!map) return;
     setFollow(false);
-    map.fitBounds(routeBounds, { padding: [28, 28] });
+    map.fitBounds(routeBounds, { padding: 40 });
   });
   $("btn-big").addEventListener("click", function () {
     var big = $("app").classList.toggle("map-big");
     this.setAttribute("aria-pressed", big ? "true" : "false");
     this.setAttribute("aria-label", big ? "Make the map smaller" : "Make the map bigger");
     $("big-icon").setAttribute("d", big ? "M7 14l5-5 5 5" : "M7 10l5 5 5-5");
-    setTimeout(function () { if (map) map.invalidateSize(); }, 280);
+    setTimeout(function () { if (map) map.resize(); }, 280);
   });
 
   /* ---------- seen ---------- */
@@ -722,8 +764,8 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
       else if (tg && tg.id === s.id) { badge.hidden = false; badge.className = "badge"; badge.textContent = "Next"; }
       else badge.hidden = true;
       if (markers[s.id]) {
-        markers[s.id].setIcon(pinIcon(s, (done ? " done" : "") + (tg && tg.id === s.id ? " next" : "")));
-        markers[s.id].setZIndexOffset(tg && tg.id === s.id ? 1000 : 0);
+        markers[s.id].pin.className = pinClass(s, (done ? " done" : "") + (tg && tg.id === s.id ? " next" : ""));
+        markers[s.id].wrap.style.zIndex = (tg && tg.id === s.id) ? "3" : "1";
       }
     });
     $("progress-bar").style.width = (count / STOPS.length * 100) + "%";
@@ -782,7 +824,7 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
     follow = on;
     $("btn-me").classList.toggle("on", on);
     $("btn-me").setAttribute("aria-pressed", on ? "true" : "false");
-    if (on && map && lastPos) map.setView([lastPos.lat, lastPos.lng], Math.max(map.getZoom(), 17));
+    if (on && map && lastPos) map.easeTo({ center: [lastPos.lng, lastPos.lat], zoom: Math.max(map.getZoom(), 16.5) });
   }
   function startLocation() {
     if (!("geolocation" in navigator)) { toast("This browser can’t share your location."); return; }
@@ -798,14 +840,16 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
     $("btn-locate").hidden = true;
     $("setup-text").textContent = "Location is on. You’ll get a pop-up as you reach each stop.";
     if (map) {
-      var ll = [lastPos.lat, lastPos.lng];
+      var ll = [lastPos.lng, lastPos.lat];
       if (!youMarker) {
-        youCircle = L.circle(ll, { radius: lastPos.acc, color: "#4da3ff", weight: 1, opacity: .4, fillColor: "#4da3ff", fillOpacity: .1, interactive: false }).addTo(map);
-        youMarker = L.marker(ll, { icon: L.divIcon({ className: "", iconSize: [18, 18], iconAnchor: [9, 9], html: '<div class="you-dot"></div>' }), interactive: false, zIndexOffset: 2000 }).addTo(map);
+        var dot = document.createElement("div");
+        dot.className = "you-dot";
+        dot.style.zIndex = "5";
+        youMarker = new maplibregl.Marker({ element: dot }).setLngLat(ll).addTo(map);
       } else {
-        youMarker.setLatLng(ll); youCircle.setLatLng(ll); youCircle.setRadius(lastPos.acc);
+        youMarker.setLngLat(ll);
       }
-      if (follow) { if (first) map.setView(ll, 17); else map.panTo(ll, { animate: true }); }
+      if (follow) { if (first) map.jumpTo({ center: ll, zoom: 17 }); else map.easeTo({ center: ll, duration: 600 }); }
     }
     checkArrival();
     render();
@@ -902,8 +946,8 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
 
   render();
   setInterval(render, 30000);
-  if (map) setTimeout(function () { map.invalidateSize(); }, 200);
-  window.addEventListener("resize", function () { if (map) map.invalidateSize(); });
+  if (map) setTimeout(function () { map.resize(); }, 200);
+  window.addEventListener("resize", function () { if (map) map.resize(); });
 })();
 </script>
 </body>
