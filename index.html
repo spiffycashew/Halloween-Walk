@@ -333,6 +333,14 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
 .i-gate { position: relative; z-index: 1; margin: auto 0 0; width: 100%; max-width: 520px; display: flex; flex-direction: column; gap: 16px; animation: rv 1.1s ease .3s both; }
 .i-gate-line { margin: 0 0 6px; font-family: var(--font-display); font-size: clamp(50px, 15vw, 84px); line-height: .9; color: var(--bone); text-shadow: 0 0 24px rgba(255,212,126,.18); }
 .i-gate.leaving { animation: leave .6s ease forwards; }
+.i-track-wrap { display: flex; flex-direction: column; gap: 6px; }
+.i-track-label { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--mist); font-weight: 700; }
+.i-track { display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px; background: rgba(240,230,212,.09); width: max-content; max-width: 100%; }
+.i-opt {
+  border: 0; background: transparent; color: var(--bone); padding: 9px 16px; border-radius: 999px; cursor: pointer;
+  font: 700 15px/1 var(--font-body); white-space: nowrap;
+}
+.i-opt[aria-checked="true"] { background: var(--bone); color: var(--night); }
 .i-sound {
   position: absolute; z-index: 3; top: max(20px, env(safe-area-inset-top, 0px)); left: max(20px, env(safe-area-inset-left, 0px));
   width: 44px; height: 44px; border-radius: 50%; padding: 0; cursor: pointer; display: grid; place-items: center;
@@ -587,6 +595,13 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
   <div class="i-gate" id="intro-gate">
     <span class="i-eyebrow">Halloween Night Walk · 31 October</span>
     <p class="i-gate-line">Turn your sound up.</p>
+    <div class="i-track-wrap">
+      <span class="i-track-label" id="track-label">Soundtrack</span>
+      <div class="i-track" role="radiogroup" aria-labelledby="track-label">
+        <button type="button" role="radio" class="i-opt" data-track="haunted" aria-checked="true">Haunted</button>
+        <button type="button" role="radio" class="i-opt" data-track="pop" aria-checked="false">Monster pop</button>
+      </div>
+    </div>
     <button type="button" class="i-begin" id="enter-sound">Enter</button>
     <button type="button" class="i-skip" id="enter-quiet">Enter without sound</button>
   </div>
@@ -1155,7 +1170,7 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
   /* ---------- soundtrack: an original spooky theme synthesised in the browser ---------- */
   var Music = (function () {
     var ctx = null, master = null, dry = null, verb = null;
-    var playing = false, muted = false, timers = [], sources = [];
+    var playing = false, muted = false, timers = [], sources = [], style = "haunted";
     var BPM = 116, BEAT = 60 / BPM, BARS = 8, CYCLE = BARS * 4 * BEAT;
     var LEVEL = 0.9;
 
@@ -1286,12 +1301,142 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
     }
     function loop(t0, first) {
       if (!playing) return;
-      cycle(t0, first);
-      var next = t0 + CYCLE;
+      var len = style === "pop" ? popCycle(t0, first) : (cycle(t0, first), CYCLE);
+      var next = t0 + len;
       timers.push(setTimeout(function () { loop(next, false); }, Math.max(0, (next - ctx.currentTime - 1.5) * 1000)));
     }
 
-    function start() {
+    /* ===== Monster pop: an original dark electro-pop track in the same spooky key world ===== */
+    var P_BPM = 122, STEP = 60 / P_BPM / 4, P_BAR = 16 * STEP, P_BARS = 8;
+    var pump = null, echo = null, hatBuf = null;
+    var PROG = [
+      { root: 45, chord: [57, 60, 64] },   /* A minor */
+      { root: 41, chord: [53, 57, 60] },   /* F */
+      { root: 48, chord: [55, 60, 64] },   /* C */
+      { root: 43, chord: [55, 59, 62] }    /* G */
+    ];
+    var STABS = [2, 6, 7, 10, 14];
+    /* [16th step, midi note, length in steps] */
+    var HOOK1 = [[0, 69, 2], [2, 69, 1], [3, 72, 1], [4, 76, 3], [8, 74, 2], [10, 72, 2], [12, 74, 2], [14, 76, 2],
+                 [16, 77, 4], [20, 76, 2], [22, 74, 2], [24, 72, 4], [28, 69, 4]];
+    var HOOK2 = [[0, 76, 2], [2, 76, 1], [3, 79, 1], [4, 79, 3], [8, 76, 2], [10, 74, 2], [12, 72, 2], [14, 74, 2],
+                 [16, 74, 4], [20, 71, 2], [22, 72, 2], [24, 74, 4], [28, 76, 4]];
+
+    function popSetup() {
+      hatBuf = noiseBuffer(0.4);
+      pump = ctx.createGain(); pump.gain.value = 1; out(pump, 0.15);
+      echo = ctx.createDelay(1); echo.delayTime.value = 3 * STEP;
+      var fb = ctx.createGain(); fb.gain.value = 0.3;
+      var eg = ctx.createGain(); eg.gain.value = 0.35;
+      echo.connect(fb); fb.connect(echo); echo.connect(eg); out(eg, 0.4);
+    }
+    function duck(t) { pump.gain.setValueAtTime(0.32, t); pump.gain.linearRampToValueAtTime(1, t + 0.22); }
+    function popKick(t, vol) {
+      var o = ctx.createOscillator(), g = ctx.createGain();
+      o.frequency.setValueAtTime(160, t); o.frequency.exponentialRampToValueAtTime(46, t + 0.1);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.38);
+      o.connect(g); out(g, 0.05); o.start(t); o.stop(t + 0.4);
+    }
+    function hat(t, vol, open) {
+      var n = ctx.createBufferSource(); n.buffer = hatBuf;
+      var hp = ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 7500;
+      var g = ctx.createGain();
+      g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + (open ? 0.16 : 0.045));
+      n.connect(hp); hp.connect(g); out(g, 0.1); n.start(t); n.stop(t + 0.18);
+    }
+    function clap(t, vol) {
+      [0, 0.011, 0.022].forEach(function (d, i) {
+        var n = ctx.createBufferSource(); n.buffer = hatBuf;
+        var bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = 1500; bp.Q.value = 1.1;
+        var g = ctx.createGain(), tt = t + d, last = i === 2;
+        g.gain.setValueAtTime(vol * (last ? 1 : 0.6), tt); g.gain.exponentialRampToValueAtTime(0.0001, tt + (last ? 0.22 : 0.02));
+        n.connect(bp); bp.connect(g); out(g, 0.4); n.start(tt); n.stop(tt + 0.25);
+      });
+    }
+    function crash(t, vol) {
+      var n = ctx.createBufferSource(); n.buffer = noiseBuffer(2.2);
+      var hp = ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 3500;
+      var g = ctx.createGain(); g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 2);
+      n.connect(hp); hp.connect(g); out(g, 0.5); n.start(t); n.stop(t + 2.1);
+    }
+    function popBass(t, m, vol) {
+      var o = ctx.createOscillator(), sub = ctx.createOscillator(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+      o.type = "sawtooth"; sub.type = "square"; o.frequency.value = hz(m); sub.frequency.value = hz(m - 12);
+      var sg = ctx.createGain(); sg.gain.value = 0.4;
+      f.type = "lowpass"; f.Q.value = 4; f.frequency.setValueAtTime(1300, t); f.frequency.exponentialRampToValueAtTime(260, t + 0.16);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.005); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.2);
+      o.connect(f); sub.connect(sg); sg.connect(f); f.connect(g); g.connect(pump);
+      o.start(t); sub.start(t); o.stop(t + 0.22); sub.stop(t + 0.22);
+    }
+    function stab(t, notes, vol) {
+      var f = ctx.createBiquadFilter(), g = ctx.createGain();
+      f.type = "lowpass"; f.Q.value = 2; f.frequency.setValueAtTime(3800, t); f.frequency.exponentialRampToValueAtTime(700, t + 0.16);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.24);
+      notes.forEach(function (m) {
+        [-11, 11].forEach(function (cents) {
+          var o = ctx.createOscillator(); o.type = "sawtooth"; o.frequency.value = hz(m); o.detune.value = cents;
+          o.connect(f); o.start(t); o.stop(t + 0.26);
+        });
+      });
+      f.connect(g); g.connect(pump);
+    }
+    function popLead(t, m, steps, vol) {
+      var d = steps * STEP;
+      var o = ctx.createOscillator(), o2 = ctx.createOscillator(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+      o.type = "square"; o2.type = "sawtooth"; o.frequency.value = hz(m); o2.frequency.value = hz(m); o2.detune.value = 8;
+      f.type = "lowpass"; f.frequency.value = 3800; f.Q.value = 1;
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.006);
+      g.gain.setTargetAtTime(vol * 0.7, t + 0.05, 0.08); g.gain.setTargetAtTime(0.0001, t + d - 0.03, 0.03);
+      o.connect(f); o2.connect(f); f.connect(g); out(g, 0.3); g.connect(echo);
+      o.start(t); o2.start(t); o.stop(t + d + 0.2); o2.stop(t + d + 0.2);
+    }
+    function riser(t, dur) {
+      var n = ctx.createBufferSource(); n.buffer = noiseBuffer(dur + 0.1);
+      var bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.Q.value = 2.5;
+      bp.frequency.setValueAtTime(300, t); bp.frequency.exponentialRampToValueAtTime(6000, t + dur);
+      var g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.14, t + dur);
+      n.connect(bp); bp.connect(g); out(g, 0.5); n.start(t); n.stop(t + dur + 0.05);
+    }
+    function ghostSlide(t) {
+      var o = ctx.createOscillator(), g = ctx.createGain(), vib = ctx.createOscillator(), vg = ctx.createGain();
+      o.type = "sine"; o.frequency.setValueAtTime(hz(81), t); o.frequency.exponentialRampToValueAtTime(hz(57), t + 0.9);
+      vib.frequency.value = 6; vg.gain.value = 9; vib.connect(vg); vg.connect(o.frequency);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.08, t + 0.08); g.gain.exponentialRampToValueAtTime(0.0001, t + 1);
+      o.connect(g); out(g, 0.9); [o, vib].forEach(function (x) { x.start(t); x.stop(t + 1.05); });
+    }
+    function popCycle(t0, first) {
+      crash(t0, first ? 0.32 : 0.2);
+      organ(t0, [45, 57, 60, 64], 1.0, first ? 0.07 : 0.035);
+      for (var b = 0; b < P_BARS; b++) {
+        var tb = t0 + b * P_BAR, ch = PROG[b % 4];
+        for (var s = 0; s < 16; s++) {
+          var t = tb + s * STEP;
+          if (s % 4 === 0) { popKick(t, 0.8); duck(t); }
+          if (s % 4 === 2) hat(t, 0.07, true); else hat(t, 0.022, false);
+          if (s === 4 || s === 12) clap(t, 0.3);
+          if (s % 2 === 0) popBass(t, ch.root + (s % 4 === 2 ? 12 : 0), 0.2);
+          if (STABS.indexOf(s) >= 0) stab(t, ch.chord, 0.035);
+        }
+      }
+      [0, 4].forEach(function (startBar, rep) {
+        var base = t0 + startBar * P_BAR;
+        HOOK1.forEach(function (n) {
+          popLead(base + n[0] * STEP, n[1], n[2], 0.085);
+          if (rep) popLead(base + n[0] * STEP, n[1] + 12, n[2], 0.04);
+        });
+        HOOK2.forEach(function (n) {
+          popLead(base + 2 * P_BAR + n[0] * STEP, n[1], n[2], 0.085);
+          if (rep) popLead(base + 2 * P_BAR + n[0] * STEP, n[1] + 12, n[2], 0.04);
+        });
+      });
+      var last = t0 + 7 * P_BAR;
+      riser(last, P_BAR);
+      for (var r = 0; r < 8; r++) clap(last + (8 + r) * STEP, 0.08 + r * 0.03);
+      ghostSlide(last + 12 * STEP);
+      return P_BARS * P_BAR;
+    }
+
+    function start(which) {
       var AC = window.AudioContext || window.webkitAudioContext;
       if (!AC || playing) return false;
       try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}
@@ -1304,12 +1449,19 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
         verb = ctx.createConvolver(); verb.buffer = impulse(3.4, 2.4);
         var wet = ctx.createGain(); wet.gain.value = 0.5; verb.connect(wet); wet.connect(master);
         playing = true; muted = false;
+        style = which === "pop" ? "pop" : "haunted";
         var t = ctx.currentTime + 0.03;
         master.gain.setValueAtTime(0.0001, t); master.gain.exponentialRampToValueAtTime(LEVEL, t + 0.05);
-        thunder(t, 0.5);
-        organ(t, [38, 50, 53, 57, 62], 2.2, 0.12);
-        drone(); wind();
-        loop(t + 1.2, true);
+        if (style === "pop") {
+          dry.gain.value = 0.95;
+          popSetup();
+          loop(t, true);
+        } else {
+          thunder(t, 0.5);
+          organ(t, [38, 50, 53, 57, 62], 2.2, 0.12);
+          drone(); wind();
+          loop(t + 1.2, true);
+        }
         return true;
       } catch (e) { playing = false; return false; }
     }
@@ -1364,9 +1516,19 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
       el.style.animation = "none"; void el.offsetWidth; el.style.animation = "";
     });
   }
+  var track = store("hw2026-track") === "pop" ? "pop" : "haunted";
+  function renderTrack() {
+    Array.prototype.forEach.call(document.querySelectorAll(".i-opt"), function (b) {
+      b.setAttribute("aria-checked", b.getAttribute("data-track") === track ? "true" : "false");
+    });
+  }
+  Array.prototype.forEach.call(document.querySelectorAll(".i-opt"), function (b) {
+    b.addEventListener("click", function () { track = b.getAttribute("data-track"); store("hw2026-track", track); renderTrack(); });
+  });
+  renderTrack();
   function enterIntro(withSound) {
     var gate = $("intro-gate");
-    if (withSound && Music.start()) {
+    if (withSound && Music.start(track)) {
       $("intro-sound").hidden = false;
       $("intro-sound").setAttribute("aria-pressed", "false");
       $("intro-sound").setAttribute("aria-label", "Mute the music");
