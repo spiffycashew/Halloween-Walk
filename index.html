@@ -86,7 +86,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--candle); outlin
 
 /* ---------- stage: full-screen map ---------- */
 .stage { position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden; }
-#map { position: absolute; inset: 0; background: #efebe3; }
+#map { position: absolute; inset: 0; background: #16121c; }
 .maplibregl-map { font-family: var(--font-body); }
 .maplibregl-ctrl-attrib { font-size: 10px; }
 .maplibregl-ctrl-bottom-right { bottom: auto; top: 0; }
@@ -408,8 +408,8 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
   <div class="stage" id="stage">
     <div id="map" role="region" aria-label="Map of the walk"></div>
     <div class="legend" aria-hidden="true">
-      <span><i style="background:#e8751a"></i>Before the park</span>
-      <span><i style="background:#8456ee"></i>After the park</span>
+      <span><i style="background:#f28a2e"></i>Before the park</span>
+      <span><i style="background:#b48cff"></i>After the park</span>
     </div>
     <div class="map-note" id="map-note"></div>
     <div class="map-btns" id="map-btns">
@@ -907,14 +907,14 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
 
   /* ---------- map ---------- */
   /* Clean street style from OpenFreeMap (no key), drawn by MapLibre. Plain OpenStreetMap tiles are the fallback. */
-  var STYLE_URL = "https://tiles.openfreemap.org/styles/liberty";
+  var STYLE_URLS = ["https://tiles.openfreemap.org/styles/dark", "https://tiles.openfreemap.org/styles/liberty"];
   var FALLBACK_STYLE = {
     version: 8,
     sources: { osm: { type: "raster", tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"], tileSize: 256, maxzoom: 19,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' } },
     layers: [{ id: "osm", type: "raster", source: "osm" }]
   };
-  var LINE_COLORS = { leg1: "#e8751a", park: "#3f9a55", leg2: "#8456ee" };
+  var LINE_COLORS = { leg1: "#f28a2e", park: "#6fcf86", leg2: "#b48cff" };
   var map = null, mapReady = false, markers = {}, youMarker = null, routeBounds = null, popup = null;
   var routeData = {};
   function lngLat(p) { return [p.lng, p.lat]; }
@@ -925,17 +925,37 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
     STOPS.forEach(function (s) { routeBounds.extend(lngLat(s)); });
 
     map = new maplibregl.Map({
-      container: "map", style: STYLE_URL, bounds: routeBounds, fitBoundsOptions: { padding: 40 },
+      container: "map", style: STYLE_URLS[0], bounds: routeBounds, fitBoundsOptions: { padding: 40 },
       attributionControl: false, dragRotate: false, pitchWithRotate: false, touchPitch: false, maxZoom: 19
     });
     map.addControl(new maplibregl.AttributionControl({ compact: true }), "bottom-right");
     if (map.touchZoomRotate && map.touchZoomRotate.disableRotation) map.touchZoomRotate.disableRotation();
 
-    var styleOk = false, fellBack = false;
+    var styleOk = false, fellBack = false, styleTry = 0;
     var useFallback = function () {
       if (styleOk || fellBack) return;
+      styleTry++;
+      if (styleTry < STYLE_URLS.length) { map.setStyle(STYLE_URLS[styleTry]); return; }
       fellBack = true;
       map.setStyle(FALLBACK_STYLE);
+    };
+    /* Halloween tint: night-sky ground, inky purple water, dark moss parks */
+    var tint = function () {
+      try {
+        var light = styleTry > 0 && !fellBack;
+        map.getStyle().layers.forEach(function (l) {
+          var id = l.id.toLowerCase();
+          if (l.type === "background") map.setPaintProperty(l.id, "background-color", "#16121c");
+          else if (l.type === "fill" && /water|ocean|lake|river/.test(id)) map.setPaintProperty(l.id, "fill-color", "#231c3a");
+          else if (l.type === "fill" && /park|wood|grass|forest|garden|cemetery|pitch/.test(id)) map.setPaintProperty(l.id, "fill-color", "#1b2a20");
+          else if (light && l.type === "fill" && /landuse|landcover|residential|building/.test(id)) map.setPaintProperty(l.id, "fill-color", "#221c29");
+          else if (light && l.type === "line" && /road|street|highway|path|bridge|tunnel/.test(id)) map.setPaintProperty(l.id, "line-color", "#3d3448");
+          else if (l.type === "symbol" && l.paint && l.layout && l.layout["text-field"]) {
+            map.setPaintProperty(l.id, "text-color", "#b3a8bd");
+            map.setPaintProperty(l.id, "text-halo-color", "#16121c");
+          }
+        });
+      } catch (e) {}
     };
     map.on("styledata", function () { styleOk = true; });
     map.on("error", function () { useFallback(); });
@@ -978,7 +998,7 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
       });
       mapReady = true;
     };
-    map.on("style.load", function () { try { addRouteLayers(); } catch (e) {} });
+    map.on("style.load", function () { if (!fellBack) tint(); try { addRouteLayers(); } catch (e) {} });
     var updateRoute = function (key, coords) {
       routeData[key] = { coords: coords, approx: false };
       if (mapReady) { try { addRouteLayers(); } catch (e) {} }
