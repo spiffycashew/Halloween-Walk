@@ -333,14 +333,6 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
 .i-gate { position: relative; z-index: 1; margin: auto 0 0; width: 100%; max-width: 520px; display: flex; flex-direction: column; gap: 16px; animation: rv 1.1s ease .3s both; }
 .i-gate-line { margin: 0 0 6px; font-family: var(--font-display); font-size: clamp(50px, 15vw, 84px); line-height: .9; color: var(--bone); text-shadow: 0 0 24px rgba(255,212,126,.18); }
 .i-gate.leaving { animation: leave .6s ease forwards; }
-.i-track-wrap { display: flex; flex-direction: column; gap: 6px; }
-.i-track-label { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--mist); font-weight: 700; }
-.i-track { display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px; background: rgba(240,230,212,.09); width: max-content; max-width: 100%; }
-.i-opt {
-  border: 0; background: transparent; color: var(--bone); padding: 9px 16px; border-radius: 999px; cursor: pointer;
-  font: 700 15px/1 var(--font-body); white-space: nowrap;
-}
-.i-opt[aria-checked="true"] { background: var(--bone); color: var(--night); }
 .i-sound {
   position: absolute; z-index: 3; top: max(20px, env(safe-area-inset-top, 0px)); left: max(20px, env(safe-area-inset-left, 0px));
   width: 44px; height: 44px; border-radius: 50%; padding: 0; cursor: pointer; display: grid; place-items: center;
@@ -376,66 +368,6 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
 .intro.leaving { animation: leave .8s ease forwards; pointer-events: none; }
 @keyframes leave { to { opacity: 0; transform: scale(1.05); filter: blur(6px); } }
 
-/* ---------- bingo ---------- */
-.bingo-btn { position: relative; }
-.bingo-count {
-  position: absolute; top: -5px; right: -5px; min-width: 19px; height: 19px; border-radius: 10px; padding: 0 5px;
-  background: var(--pumpkin); color: var(--pumpkin-ink); font-size: 11px; font-weight: 700;
-  display: grid; place-items: center; font-variant-numeric: tabular-nums;
-}
-.bingo-entry {
-  display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: center;
-  padding: 14px; border-radius: 14px; border: 1px solid var(--line);
-  background: radial-gradient(90% 120% at 100% 0%, rgba(242,138,46,.14), transparent 60%), var(--card);
-}
-.bingo-entry h3 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 26px; line-height: 1; color: var(--pumpkin); }
-.bingo-entry p { margin: 0; font-size: 14px; color: var(--mist); grid-column: 1; }
-.bingo-entry .btn { grid-column: 2; grid-row: 1 / span 2; }
-.bingo {
-  position: fixed; inset: 0; z-index: 1500; background: var(--night); overflow-y: auto;
-  padding-top: max(14px, env(safe-area-inset-top, 0px));
-  padding-bottom: max(20px, env(safe-area-inset-bottom, 0px));
-  padding-left: max(16px, env(safe-area-inset-left, 0px));
-  padding-right: max(16px, env(safe-area-inset-right, 0px));
-  animation: rise .25s ease-out;
-}
-.bingo-inner { width: 100%; max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
-.bingo-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.bingo-top h2 { font-size: 38px; color: var(--pumpkin); text-shadow: 0 0 18px rgba(242,138,46,.3); }
-.bingo .sub { margin: 0; font-size: 15px; color: var(--mist); }
-.grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; }
-.sq {
-  aspect-ratio: 1; max-width: 100%; min-width: 0; border-radius: 12px; border: 1.5px solid var(--line);
-  background: var(--card); color: var(--bone); font: 700 13px/1.2 var(--font-body); padding: 6px;
-  display: grid; place-items: center; text-align: center; cursor: pointer; overflow-wrap: break-word; hyphens: auto;
-  transition: background .15s ease, border-color .15s ease;
-}
-.sq[aria-pressed="true"] { background: var(--pumpkin); border-color: var(--pumpkin); color: var(--pumpkin-ink); }
-.sq.stamp { animation: stamp .32s ease-out; }
-.sq.win { box-shadow: 0 0 0 3px var(--candle); }
-@keyframes stamp { 0% { transform: scale(.84); } 60% { transform: scale(1.06); } 100% { transform: none; } }
-.bingo-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 14px; color: var(--mist); font-variant-numeric: tabular-nums; }
-.confirm-row {
-  display: flex; gap: 8px; flex-wrap: wrap; align-items: center; font-size: 14px;
-  padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--card);
-}
-.confirm-row span { flex: 1 1 100%; }
-.cheer {
-  position: fixed; inset: 0; z-index: 1600; display: grid; place-items: center; text-align: center; overflow: hidden;
-  background: radial-gradient(70% 50% at 50% 50%, rgba(242,138,46,.22), transparent 70%), rgba(13,9,16,.9);
-  padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px));
-}
-.cheer .big {
-  font-family: var(--font-display); font-size: clamp(76px, 26vw, 130px); line-height: .9; color: var(--pumpkin);
-  text-shadow: 0 0 40px rgba(242,138,46,.6); animation: pop .55s cubic-bezier(.2,1.6,.4,1);
-}
-@keyframes pop { from { transform: scale(.4); opacity: 0; } to { transform: none; opacity: 1; } }
-.cheer p { margin: 10px 0 20px; font-size: 18px; }
-.cheer .bat { color: #f0e6d4; opacity: .8; }
-.cheer .bat.b1 { top: 18%; left: -12%; animation: fly 3.2s ease-in-out both; }
-.cheer .bat.b2 { top: 70%; left: -12%; width: 28px; animation: fly 3.8s ease-in-out .3s both; }
-.cheer .bat.b3 { top: 32%; left: -12%; width: 22px; animation: fly 4.4s ease-in-out .6s both; }
-
 @media (min-width: 900px) {
   .app { display: grid; grid-template-columns: 1fr 440px; grid-template-rows: auto auto 1fr; }
   .top { grid-column: 1 / -1; }
@@ -458,9 +390,8 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
   <header class="top">
     <h1>Halloween Walk</h1>
     <span class="chip" id="chip">Park 7pm</span>
-    <button type="button" class="icon-btn bingo-btn" id="btn-bingo" aria-label="Open Halloween bingo">
-      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M4 4h16v16H4zM4 9.33h16M4 14.67h16M9.33 4v16M14.67 4v16"/></svg>
-      <span class="bingo-count" id="bingo-count" hidden>0</span>
+    <button type="button" class="icon-btn" id="btn-share" aria-label="Share this map with your group">
+      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 3v12M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>
     </button>
     <div class="progress" role="progressbar" aria-label="Stops seen" aria-valuemin="0" aria-valuemax="16" aria-valuenow="0" id="progress"><span id="progress-bar"></span></div>
   </header>
@@ -501,19 +432,12 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
         <div class="row">
           <button type="button" class="btn blue" id="btn-locate">Show my location</button>
           <button type="button" class="btn blue" id="btn-wake" aria-pressed="false" hidden>Keep screen on</button>
-          <button type="button" class="btn" id="btn-share">Share with the group</button>
         </div>
       </div>
 
       <div class="alert">
         <span class="t">6:55pm</span>
         <p>Be at the Holland Park gates on Kensington High Street. 7pm is the last entry slot. Don’t arrive more than 5 minutes early.</p>
-      </div>
-
-      <div class="bingo-entry">
-        <h3>Halloween Bingo</h3>
-        <p>Spot skeletons, witches and more as you walk. Everyone gets a different card.</p>
-        <button type="button" class="btn solid" id="open-bingo">Open card</button>
       </div>
 
       <section id="sec-leg1">
@@ -595,13 +519,6 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
   <div class="i-gate" id="intro-gate">
     <span class="i-eyebrow">Halloween Night Walk · 31 October</span>
     <p class="i-gate-line">Turn your sound up.</p>
-    <div class="i-track-wrap">
-      <span class="i-track-label" id="track-label">Soundtrack</span>
-      <div class="i-track" role="radiogroup" aria-labelledby="track-label">
-        <button type="button" role="radio" class="i-opt" data-track="haunted" aria-checked="true">Haunted</button>
-        <button type="button" role="radio" class="i-opt" data-track="pop" aria-checked="false">Monster pop</button>
-      </div>
-    </div>
     <button type="button" class="i-begin" id="enter-sound">Enter</button>
     <button type="button" class="i-skip" id="enter-quiet">Enter without sound</button>
   </div>
@@ -625,38 +542,6 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
     </div>
   </div>
 </div>
-
-<div class="bingo" id="bingo" hidden role="dialog" aria-modal="true" aria-labelledby="bingo-title">
-  <div class="bingo-inner">
-    <div class="bingo-top">
-      <h2 id="bingo-title">Halloween Bingo</h2>
-      <button type="button" class="btn" id="bingo-close" style="white-space:nowrap">Back to map</button>
-    </div>
-    <p class="sub">Everyone’s card is shuffled differently. Tap a square when you spot it. First to a full line shouts “Bingo!”</p>
-    <div class="grid" id="bingo-grid"></div>
-    <div class="bingo-foot">
-      <span id="bingo-status">0 of 16 spotted</span>
-      <button type="button" class="linkbtn" id="bingo-new">Shuffle a new card</button>
-    </div>
-    <div class="confirm-row" id="bingo-confirm" hidden>
-      <span>This clears your marks and shuffles the squares.</span>
-      <button type="button" class="btn solid" id="bingo-yes">Shuffle</button>
-      <button type="button" class="btn" id="bingo-no">Keep this card</button>
-    </div>
-  </div>
-</div>
-
-<div class="cheer" id="cheer" hidden role="alertdialog" aria-labelledby="cheer-big" aria-describedby="cheer-text">
-  <svg class="bat b1" viewBox="0 0 24 16" aria-hidden="true"><path fill="currentColor" d="M12 5.2c-.9 0-1.6.8-1.6.8S9 3.9 6.4 3.9C4.7 3.9 3 4.8 2 6.2c1.6 0 2.8.7 3.2 2.1-1.1-.2-2.2.1-2.9 1 1.5.1 2.6.9 3 2.3 1.4-1.4 3.4-2.1 5.1-1.1.6.4 1.1 1 1.6 1.9.5-.9 1-1.5 1.6-1.9 1.7-1 3.7-.3 5.1 1.1.4-1.4 1.5-2.2 3-2.3-.7-.9-1.8-1.2-2.9-1 .4-1.4 1.6-2.1 3.2-2.1-1-1.4-2.7-2.3-4.4-2.3-2.6 0-4 2.1-4 2.1s-.7-.8-1.6-.8z"/></svg>
-  <svg class="bat b2" viewBox="0 0 24 16" aria-hidden="true"><path fill="currentColor" d="M12 5.2c-.9 0-1.6.8-1.6.8S9 3.9 6.4 3.9C4.7 3.9 3 4.8 2 6.2c1.6 0 2.8.7 3.2 2.1-1.1-.2-2.2.1-2.9 1 1.5.1 2.6.9 3 2.3 1.4-1.4 3.4-2.1 5.1-1.1.6.4 1.1 1 1.6 1.9.5-.9 1-1.5 1.6-1.9 1.7-1 3.7-.3 5.1 1.1.4-1.4 1.5-2.2 3-2.3-.7-.9-1.8-1.2-2.9-1 .4-1.4 1.6-2.1 3.2-2.1-1-1.4-2.7-2.3-4.4-2.3-2.6 0-4 2.1-4 2.1s-.7-.8-1.6-.8z"/></svg>
-  <svg class="bat b3" viewBox="0 0 24 16" aria-hidden="true"><path fill="currentColor" d="M12 5.2c-.9 0-1.6.8-1.6.8S9 3.9 6.4 3.9C4.7 3.9 3 4.8 2 6.2c1.6 0 2.8.7 3.2 2.1-1.1-.2-2.2.1-2.9 1 1.5.1 2.6.9 3 2.3 1.4-1.4 3.4-2.1 5.1-1.1.6.4 1.1 1 1.6 1.9.5-.9 1-1.5 1.6-1.9 1.7-1 3.7-.3 5.1 1.1.4-1.4 1.5-2.2 3-2.3-.7-.9-1.8-1.2-2.9-1 .4-1.4 1.6-2.1 3.2-2.1-1-1.4-2.7-2.3-4.4-2.3-2.6 0-4 2.1-4 2.1s-.7-.8-1.6-.8z"/></svg>
-  <div>
-    <div class="big" id="cheer-big">Bingo!</div>
-    <p id="cheer-text">Shout it to the group.</p>
-    <button type="button" class="btn solid" id="cheer-ok">Keep playing</button>
-  </div>
-</div>
-
 
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script>
@@ -1170,7 +1055,7 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
   /* ---------- soundtrack: an original spooky theme synthesised in the browser ---------- */
   var Music = (function () {
     var ctx = null, master = null, dry = null, verb = null;
-    var playing = false, muted = false, timers = [], sources = [], style = "haunted";
+    var playing = false, muted = false, timers = [], sources = [];
     var BPM = 116, BEAT = 60 / BPM, BARS = 8, CYCLE = BARS * 4 * BEAT;
     var LEVEL = 0.9;
 
@@ -1301,142 +1186,12 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
     }
     function loop(t0, first) {
       if (!playing) return;
-      var len = style === "pop" ? popCycle(t0, first) : (cycle(t0, first), CYCLE);
-      var next = t0 + len;
+      cycle(t0, first);
+      var next = t0 + CYCLE;
       timers.push(setTimeout(function () { loop(next, false); }, Math.max(0, (next - ctx.currentTime - 1.5) * 1000)));
     }
 
-    /* ===== Monster pop: an original dark electro-pop track in the same spooky key world ===== */
-    var P_BPM = 122, STEP = 60 / P_BPM / 4, P_BAR = 16 * STEP, P_BARS = 8;
-    var pump = null, echo = null, hatBuf = null;
-    var PROG = [
-      { root: 45, chord: [57, 60, 64] },   /* A minor */
-      { root: 41, chord: [53, 57, 60] },   /* F */
-      { root: 48, chord: [55, 60, 64] },   /* C */
-      { root: 43, chord: [55, 59, 62] }    /* G */
-    ];
-    var STABS = [2, 6, 7, 10, 14];
-    /* [16th step, midi note, length in steps] */
-    var HOOK1 = [[0, 69, 2], [2, 69, 1], [3, 72, 1], [4, 76, 3], [8, 74, 2], [10, 72, 2], [12, 74, 2], [14, 76, 2],
-                 [16, 77, 4], [20, 76, 2], [22, 74, 2], [24, 72, 4], [28, 69, 4]];
-    var HOOK2 = [[0, 76, 2], [2, 76, 1], [3, 79, 1], [4, 79, 3], [8, 76, 2], [10, 74, 2], [12, 72, 2], [14, 74, 2],
-                 [16, 74, 4], [20, 71, 2], [22, 72, 2], [24, 74, 4], [28, 76, 4]];
-
-    function popSetup() {
-      hatBuf = noiseBuffer(0.4);
-      pump = ctx.createGain(); pump.gain.value = 1; out(pump, 0.15);
-      echo = ctx.createDelay(1); echo.delayTime.value = 3 * STEP;
-      var fb = ctx.createGain(); fb.gain.value = 0.3;
-      var eg = ctx.createGain(); eg.gain.value = 0.35;
-      echo.connect(fb); fb.connect(echo); echo.connect(eg); out(eg, 0.4);
-    }
-    function duck(t) { pump.gain.setValueAtTime(0.32, t); pump.gain.linearRampToValueAtTime(1, t + 0.22); }
-    function popKick(t, vol) {
-      var o = ctx.createOscillator(), g = ctx.createGain();
-      o.frequency.setValueAtTime(160, t); o.frequency.exponentialRampToValueAtTime(46, t + 0.1);
-      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.38);
-      o.connect(g); out(g, 0.05); o.start(t); o.stop(t + 0.4);
-    }
-    function hat(t, vol, open) {
-      var n = ctx.createBufferSource(); n.buffer = hatBuf;
-      var hp = ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 7500;
-      var g = ctx.createGain();
-      g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + (open ? 0.16 : 0.045));
-      n.connect(hp); hp.connect(g); out(g, 0.1); n.start(t); n.stop(t + 0.18);
-    }
-    function clap(t, vol) {
-      [0, 0.011, 0.022].forEach(function (d, i) {
-        var n = ctx.createBufferSource(); n.buffer = hatBuf;
-        var bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = 1500; bp.Q.value = 1.1;
-        var g = ctx.createGain(), tt = t + d, last = i === 2;
-        g.gain.setValueAtTime(vol * (last ? 1 : 0.6), tt); g.gain.exponentialRampToValueAtTime(0.0001, tt + (last ? 0.22 : 0.02));
-        n.connect(bp); bp.connect(g); out(g, 0.4); n.start(tt); n.stop(tt + 0.25);
-      });
-    }
-    function crash(t, vol) {
-      var n = ctx.createBufferSource(); n.buffer = noiseBuffer(2.2);
-      var hp = ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 3500;
-      var g = ctx.createGain(); g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 2);
-      n.connect(hp); hp.connect(g); out(g, 0.5); n.start(t); n.stop(t + 2.1);
-    }
-    function popBass(t, m, vol) {
-      var o = ctx.createOscillator(), sub = ctx.createOscillator(), f = ctx.createBiquadFilter(), g = ctx.createGain();
-      o.type = "sawtooth"; sub.type = "square"; o.frequency.value = hz(m); sub.frequency.value = hz(m - 12);
-      var sg = ctx.createGain(); sg.gain.value = 0.4;
-      f.type = "lowpass"; f.Q.value = 4; f.frequency.setValueAtTime(1300, t); f.frequency.exponentialRampToValueAtTime(260, t + 0.16);
-      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.005); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.2);
-      o.connect(f); sub.connect(sg); sg.connect(f); f.connect(g); g.connect(pump);
-      o.start(t); sub.start(t); o.stop(t + 0.22); sub.stop(t + 0.22);
-    }
-    function stab(t, notes, vol) {
-      var f = ctx.createBiquadFilter(), g = ctx.createGain();
-      f.type = "lowpass"; f.Q.value = 2; f.frequency.setValueAtTime(3800, t); f.frequency.exponentialRampToValueAtTime(700, t + 0.16);
-      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.24);
-      notes.forEach(function (m) {
-        [-11, 11].forEach(function (cents) {
-          var o = ctx.createOscillator(); o.type = "sawtooth"; o.frequency.value = hz(m); o.detune.value = cents;
-          o.connect(f); o.start(t); o.stop(t + 0.26);
-        });
-      });
-      f.connect(g); g.connect(pump);
-    }
-    function popLead(t, m, steps, vol) {
-      var d = steps * STEP;
-      var o = ctx.createOscillator(), o2 = ctx.createOscillator(), f = ctx.createBiquadFilter(), g = ctx.createGain();
-      o.type = "square"; o2.type = "sawtooth"; o.frequency.value = hz(m); o2.frequency.value = hz(m); o2.detune.value = 8;
-      f.type = "lowpass"; f.frequency.value = 3800; f.Q.value = 1;
-      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.006);
-      g.gain.setTargetAtTime(vol * 0.7, t + 0.05, 0.08); g.gain.setTargetAtTime(0.0001, t + d - 0.03, 0.03);
-      o.connect(f); o2.connect(f); f.connect(g); out(g, 0.3); g.connect(echo);
-      o.start(t); o2.start(t); o.stop(t + d + 0.2); o2.stop(t + d + 0.2);
-    }
-    function riser(t, dur) {
-      var n = ctx.createBufferSource(); n.buffer = noiseBuffer(dur + 0.1);
-      var bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.Q.value = 2.5;
-      bp.frequency.setValueAtTime(300, t); bp.frequency.exponentialRampToValueAtTime(6000, t + dur);
-      var g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.14, t + dur);
-      n.connect(bp); bp.connect(g); out(g, 0.5); n.start(t); n.stop(t + dur + 0.05);
-    }
-    function ghostSlide(t) {
-      var o = ctx.createOscillator(), g = ctx.createGain(), vib = ctx.createOscillator(), vg = ctx.createGain();
-      o.type = "sine"; o.frequency.setValueAtTime(hz(81), t); o.frequency.exponentialRampToValueAtTime(hz(57), t + 0.9);
-      vib.frequency.value = 6; vg.gain.value = 9; vib.connect(vg); vg.connect(o.frequency);
-      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.08, t + 0.08); g.gain.exponentialRampToValueAtTime(0.0001, t + 1);
-      o.connect(g); out(g, 0.9); [o, vib].forEach(function (x) { x.start(t); x.stop(t + 1.05); });
-    }
-    function popCycle(t0, first) {
-      crash(t0, first ? 0.32 : 0.2);
-      organ(t0, [45, 57, 60, 64], 1.0, first ? 0.07 : 0.035);
-      for (var b = 0; b < P_BARS; b++) {
-        var tb = t0 + b * P_BAR, ch = PROG[b % 4];
-        for (var s = 0; s < 16; s++) {
-          var t = tb + s * STEP;
-          if (s % 4 === 0) { popKick(t, 0.8); duck(t); }
-          if (s % 4 === 2) hat(t, 0.07, true); else hat(t, 0.022, false);
-          if (s === 4 || s === 12) clap(t, 0.3);
-          if (s % 2 === 0) popBass(t, ch.root + (s % 4 === 2 ? 12 : 0), 0.2);
-          if (STABS.indexOf(s) >= 0) stab(t, ch.chord, 0.035);
-        }
-      }
-      [0, 4].forEach(function (startBar, rep) {
-        var base = t0 + startBar * P_BAR;
-        HOOK1.forEach(function (n) {
-          popLead(base + n[0] * STEP, n[1], n[2], 0.085);
-          if (rep) popLead(base + n[0] * STEP, n[1] + 12, n[2], 0.04);
-        });
-        HOOK2.forEach(function (n) {
-          popLead(base + 2 * P_BAR + n[0] * STEP, n[1], n[2], 0.085);
-          if (rep) popLead(base + 2 * P_BAR + n[0] * STEP, n[1] + 12, n[2], 0.04);
-        });
-      });
-      var last = t0 + 7 * P_BAR;
-      riser(last, P_BAR);
-      for (var r = 0; r < 8; r++) clap(last + (8 + r) * STEP, 0.08 + r * 0.03);
-      ghostSlide(last + 12 * STEP);
-      return P_BARS * P_BAR;
-    }
-
-    function start(which) {
+    function start() {
       var AC = window.AudioContext || window.webkitAudioContext;
       if (!AC || playing) return false;
       try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}
@@ -1449,19 +1204,12 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
         verb = ctx.createConvolver(); verb.buffer = impulse(3.4, 2.4);
         var wet = ctx.createGain(); wet.gain.value = 0.5; verb.connect(wet); wet.connect(master);
         playing = true; muted = false;
-        style = which === "pop" ? "pop" : "haunted";
         var t = ctx.currentTime + 0.03;
         master.gain.setValueAtTime(0.0001, t); master.gain.exponentialRampToValueAtTime(LEVEL, t + 0.05);
-        if (style === "pop") {
-          dry.gain.value = 0.95;
-          popSetup();
-          loop(t, true);
-        } else {
-          thunder(t, 0.5);
-          organ(t, [38, 50, 53, 57, 62], 2.2, 0.12);
-          drone(); wind();
-          loop(t + 1.2, true);
-        }
+        thunder(t, 0.5);
+        organ(t, [38, 50, 53, 57, 62], 2.2, 0.12);
+        drone(); wind();
+        loop(t + 1.2, true);
         return true;
       } catch (e) { playing = false; return false; }
     }
@@ -1485,20 +1233,7 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
       master.gain.cancelScheduledValues(t); master.gain.setValueAtTime(Math.max(master.gain.value, 0.0001), t);
       master.gain.exponentialRampToValueAtTime(on ? 0.0001 : LEVEL, t + 0.3);
     }
-    /* a short spooky flourish for bingo, only if sound was switched on earlier */
-    function sting() {
-      if (!ctx || ctx.state !== "running") return;
-      if (!master || !playing) {
-        master = ctx.createGain(); master.gain.value = 0.8; master.connect(ctx.destination);
-        dry = ctx.createGain(); dry.gain.value = 1; dry.connect(master);
-        verb = ctx.createConvolver(); verb.buffer = impulse(2.5, 2.4);
-        var wet = ctx.createGain(); wet.gain.value = 0.5; verb.connect(wet); wet.connect(master);
-      }
-      var t = ctx.currentTime + 0.05;
-      organ(t, [50, 53, 56, 59], 0.9, 0.1);
-      [74, 77, 80, 83, 86].forEach(function (m, i) { bell(t + 0.1 + i * 0.08, m, 0.09); });
-    }
-    return { start: start, stop: stop, setMuted: setMuted, sting: sting,
+    return { start: start, stop: stop, setMuted: setMuted,
              isPlaying: function () { return playing; }, isMuted: function () { return muted; } };
   })();
 
@@ -1516,19 +1251,9 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
       el.style.animation = "none"; void el.offsetWidth; el.style.animation = "";
     });
   }
-  var track = store("hw2026-track") === "pop" ? "pop" : "haunted";
-  function renderTrack() {
-    Array.prototype.forEach.call(document.querySelectorAll(".i-opt"), function (b) {
-      b.setAttribute("aria-checked", b.getAttribute("data-track") === track ? "true" : "false");
-    });
-  }
-  Array.prototype.forEach.call(document.querySelectorAll(".i-opt"), function (b) {
-    b.addEventListener("click", function () { track = b.getAttribute("data-track"); store("hw2026-track", track); renderTrack(); });
-  });
-  renderTrack();
   function enterIntro(withSound) {
     var gate = $("intro-gate");
-    if (withSound && Music.start(track)) {
+    if (withSound && Music.start()) {
       $("intro-sound").hidden = false;
       $("intro-sound").setAttribute("aria-pressed", "false");
       $("intro-sound").setAttribute("aria-label", "Mute the music");
@@ -1561,100 +1286,6 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
   $("intro-skip").addEventListener("click", function () { closeIntro(false); });
   $("replay-intro").addEventListener("click", openIntro);
   if (store("hw2026-intro-seen") !== "1") openIntro();
-
-  /* ---------- bingo ---------- */
-  var BINGO_ITEMS = [
-    "Climbing skeleton", "Giant spider", "Witch on a broom", "Grim reaper",
-    "Pumpkin arch", "Black cat", "Skeleton dog", "Sugar skull",
-    "‘Keep out’ sign", "Gravestone", "Mummy", "Ghost in a tree",
-    "Lit jack-o’-lantern", "Coffin", "Dog in costume", "Cauldron"
-  ];
-  var LINES = [];
-  (function () {
-    for (var r = 0; r < 4; r++) LINES.push([r * 4, r * 4 + 1, r * 4 + 2, r * 4 + 3]);
-    for (var c = 0; c < 4; c++) LINES.push([c, c + 4, c + 8, c + 12]);
-    LINES.push([0, 5, 10, 15], [3, 6, 9, 12]);
-  })();
-  function shuffled() {
-    var a = BINGO_ITEMS.map(function (_, i) { return i; });
-    for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
-    return a;
-  }
-  var order = null, marks = {};
-  try {
-    order = JSON.parse(store("hw2026-bingo-order") || "null");
-    marks = JSON.parse(store("hw2026-bingo-marks") || "{}") || {};
-  } catch (e) { order = null; marks = {}; }
-  if (!order || order.length !== BINGO_ITEMS.length) { order = shuffled(); marks = {}; }
-  function saveBingo() { store("hw2026-bingo-order", JSON.stringify(order)); store("hw2026-bingo-marks", JSON.stringify(marks)); }
-  saveBingo();
-  function winning() { return LINES.filter(function (l) { return l.every(function (p) { return marks[p]; }); }); }
-  function countMarks() { return Object.keys(marks).length; }
-
-  var squares = [];
-  function buildGrid() {
-    var grid = $("bingo-grid");
-    grid.innerHTML = ""; squares = [];
-    order.forEach(function (itemIdx, pos) {
-      var b = document.createElement("button");
-      b.type = "button"; b.className = "sq"; b.id = "sq-" + pos;
-      b.textContent = BINGO_ITEMS[itemIdx];
-      b.addEventListener("click", function () { toggleMark(pos); });
-      b.addEventListener("animationend", function () { b.classList.remove("stamp"); });
-      grid.appendChild(b); squares.push(b);
-    });
-    renderBingo();
-  }
-  function renderBingo() {
-    var wins = winning(), winCells = {};
-    wins.forEach(function (l) { l.forEach(function (p) { winCells[p] = 1; }); });
-    squares.forEach(function (b, pos) {
-      b.setAttribute("aria-pressed", marks[pos] ? "true" : "false");
-      b.classList.toggle("win", !!winCells[pos]);
-    });
-    var n = countMarks();
-    $("bingo-status").textContent = n + " of 16 spotted" + (wins.length ? " · " + wins.length + (wins.length === 1 ? " line" : " lines") : "");
-    var cnt = $("bingo-count");
-    cnt.hidden = n === 0; cnt.textContent = String(n);
-  }
-  function toggleMark(pos) {
-    var before = winning().length;
-    if (marks[pos]) delete marks[pos]; else { marks[pos] = 1; squares[pos].classList.add("stamp"); }
-    saveBingo(); renderBingo();
-    var after = winning().length;
-    if (countMarks() === 16) cheer("Full house!", "You’ve spotted every single one.");
-    else if (before === 0 && after > 0) cheer("Bingo!", "Shout it to the group.");
-  }
-  function cheer(big, text) {
-    $("cheer-big").textContent = big;
-    $("cheer-text").textContent = text;
-    var c = $("cheer");
-    c.hidden = false;
-    Array.prototype.forEach.call(c.querySelectorAll(".bat, .big"), function (el) {
-      el.style.animation = "none"; void el.offsetWidth; el.style.animation = "";
-    });
-    if (navigator.vibrate) { try { navigator.vibrate([80, 40, 80, 40, 160]); } catch (e) {} }
-    Music.sting();
-    $("cheer-ok").focus();
-  }
-  $("cheer-ok").addEventListener("click", function () { $("cheer").hidden = true; });
-  function openBingo() { $("bingo").hidden = false; $("bingo").scrollTop = 0; }
-  function closeBingo() { $("bingo").hidden = true; $("bingo-confirm").hidden = true; }
-  $("btn-bingo").addEventListener("click", openBingo);
-  $("open-bingo").addEventListener("click", openBingo);
-  $("bingo-close").addEventListener("click", closeBingo);
-  $("bingo-new").addEventListener("click", function () { $("bingo-confirm").hidden = false; });
-  $("bingo-no").addEventListener("click", function () { $("bingo-confirm").hidden = true; });
-  $("bingo-yes").addEventListener("click", function () {
-    order = shuffled(); marks = {}; saveBingo(); buildGrid();
-    $("bingo-confirm").hidden = true; toast("New card shuffled.");
-  });
-  document.addEventListener("keydown", function (ev) {
-    if (ev.key !== "Escape") return;
-    if (!$("cheer").hidden) $("cheer").hidden = true;
-    else if (!$("bingo").hidden) closeBingo();
-  });
-  buildGrid();
 
   /* ---------- wiring ---------- */
   $("btn-locate").addEventListener("click", startLocation);
