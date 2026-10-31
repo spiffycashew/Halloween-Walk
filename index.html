@@ -84,54 +84,55 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--candle); outlin
 .progress { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--line); }
 .progress span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--pumpkin), var(--violet)); transition: width .4s ease; }
 
-/* ---------- map ---------- */
-.map-wrap { position: relative; flex: 0 0 42%; min-height: 220px; transition: flex-basis .25s ease; }
-.app.map-big .map-wrap { flex-basis: 68%; }
+/* ---------- stage: full-screen map ---------- */
+.stage { position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden; }
 #map { position: absolute; inset: 0; background: #efebe3; }
 .maplibregl-map { font-family: var(--font-body); }
 .maplibregl-ctrl-attrib { font-size: 10px; }
+.maplibregl-ctrl-bottom-right { bottom: auto; top: 0; }
 .hw-pop .maplibregl-popup-content {
   background: var(--card-2); color: var(--bone); border-radius: 9px; padding: 6px 10px;
   font: 700 13px/1.2 var(--font-body); box-shadow: 0 4px 14px rgba(0,0,0,.35);
 }
 .hw-pop.maplibregl-popup-anchor-bottom .maplibregl-popup-tip { border-top-color: var(--card-2); }
 .map-btns {
-  position: absolute; z-index: 500; right: max(10px, env(safe-area-inset-right, 0px)); bottom: 26px;
-  display: flex; flex-direction: column; gap: 8px;
+  position: absolute; z-index: 500; right: max(12px, env(safe-area-inset-right, 0px)); bottom: 200px;
+  display: flex; flex-direction: column; gap: 8px; transition: bottom .32s cubic-bezier(.2,.8,.2,1), opacity .2s ease;
 }
+.map-btns.away { opacity: 0; pointer-events: none; }
 .map-btn {
   width: 46px; height: 46px; border-radius: 13px; cursor: pointer; padding: 0;
   border: 1px solid var(--line); background: rgba(22,17,27,.92); color: var(--bone);
-  display: grid; place-items: center; box-shadow: 0 4px 14px rgba(0,0,0,.4);
+  display: grid; place-items: center; box-shadow: 0 4px 14px rgba(0,0,0,.35);
 }
 .map-btn.on { border-color: var(--you); color: var(--you); }
 .legend {
-  position: absolute; z-index: 500; left: max(10px, env(safe-area-inset-left, 0px)); bottom: 26px;
-  display: flex; flex-direction: column; gap: 4px; pointer-events: none;
+  position: absolute; z-index: 500; left: max(10px, env(safe-area-inset-left, 0px)); top: 10px;
+  display: flex; gap: 4px; flex-wrap: wrap; pointer-events: none;
 }
 .legend span {
-  display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: .04em;
-  color: var(--bone); background: rgba(22,17,27,.82); border-radius: 999px; padding: 3px 9px 3px 7px; width: max-content;
+  display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: .03em;
+  color: var(--bone); background: rgba(22,17,27,.85); border-radius: 999px; padding: 4px 9px 4px 7px;
 }
 .legend i { width: 14px; height: 4px; border-radius: 2px; display: inline-block; }
 .map-note {
-  position: absolute; z-index: 500; left: max(10px, env(safe-area-inset-left, 0px)); top: 10px; right: 66px;
+  position: absolute; z-index: 500; left: max(10px, env(safe-area-inset-left, 0px)); top: 42px; right: 70px;
   font-size: 12px; color: var(--bone); pointer-events: none;
 }
-.map-note:not(:empty) { background: rgba(22,17,27,.85); border-radius: 8px; padding: 5px 9px; width: max-content; max-width: calc(100% - 76px); }
+.map-note:not(:empty) { background: rgba(22,17,27,.85); border-radius: 8px; padding: 5px 9px; width: max-content; max-width: calc(100% - 80px); }
 
 /* markers */
 .pin {
   position: relative; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
   font: 700 13px/1 var(--font-body); color: var(--pumpkin-ink); background: var(--pumpkin);
   border: 2px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,.35);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: tabular-nums; transition: transform .2s ease;
 }
 .pin.leg2 { background: var(--violet); color: var(--violet-ink); }
 .pin.park { background: var(--moss); color: var(--moss-ink); }
 .pin.start { background: var(--bone); color: var(--night); }
 .pin.done { background: #5b5065; color: var(--bone); }
-.pin.next { transform: scale(1.22); border-color: var(--candle); }
+.pin.active { transform: scale(1.3); border-color: var(--night); box-shadow: 0 0 0 3px #fff, 0 4px 12px rgba(0,0,0,.45); }
 .pin.next::after {
   content: ""; position: absolute; inset: -6px; border-radius: 50%; border: 2px solid var(--candle);
   animation: ring 1.8s ease-out infinite;
@@ -146,49 +147,107 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--candle); outlin
   animation: ring 2s ease-out infinite; z-index: -1;
 }
 
-/* ---------- next-stop bar ---------- */
-.nextbar {
-  flex: none; background: var(--card);
-  border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
-  padding-block: 10px;
-  padding-left: max(14px, env(safe-area-inset-left, 0px));
-  padding-right: max(14px, env(safe-area-inset-right, 0px));
-  display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center;
+/* ---------- bottom sheet ---------- */
+.sheet {
+  position: absolute; z-index: 600; left: 0; right: 0; top: 10px; bottom: 0;
+  background: var(--night); border-radius: 20px 20px 0 0; border-top: 1px solid var(--line);
+  box-shadow: 0 -10px 30px rgba(0,0,0,.35); transform: translateY(65%); will-change: transform;
 }
-.nextbar.urgent { background: #3a1d17; border-color: var(--alarm); }
-.nextbar .left { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.nb-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.nb-eyebrow { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--candle); font-weight: 700; }
-.nextbar.urgent .nb-eyebrow { color: var(--alarm); }
-.pill {
-  font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 999px; white-space: nowrap;
-  background: rgba(143,191,138,.16); color: var(--moss);
+.sheet.anim { transition: transform .32s cubic-bezier(.2,.8,.2,1); }
+.sheet-scroll {
+  position: relative; height: 100%; overflow: hidden; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+  border-radius: 20px 20px 0 0;
 }
-.pill.late { background: rgba(255,107,74,.16); color: var(--alarm); }
-.nb-name { font-weight: 700; font-size: 17px; line-height: 1.25; }
-.nb-meta { font-size: 14px; color: var(--mist); font-variant-numeric: tabular-nums; display: flex; align-items: center; gap: 6px; }
-.arrow { flex: none; width: 18px; height: 18px; color: var(--candle); transition: transform .3s ease; }
+.sheet[data-state="full"] .sheet-scroll { overflow-y: auto; }
+.handle {
+  position: sticky; top: 0; z-index: 3; display: block; width: 100%; height: 28px; padding: 0; border: 0; cursor: grab;
+  background: var(--night); touch-action: none;
+}
+.handle span { display: block; width: 42px; height: 5px; border-radius: 3px; background: #5b5065; margin: 10px auto 0; }
+.rush {
+  margin: 0 16px 10px; padding: 10px 12px; border-radius: 14px; border: 1px solid var(--alarm); background: #3a1d17;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+}
+.rush b { display: block; color: var(--alarm); font-size: 15px; }
+.rush span { display: block; color: var(--bone); font-size: 13px; font-variant-numeric: tabular-nums; }
+.rush .btn { border-color: var(--alarm); color: var(--alarm); flex: none; }
+
+.carousel {
+  position: relative; display: flex; gap: 10px; overflow-x: auto; overflow-y: hidden;
+  scroll-snap-type: x mandatory; scrollbar-width: none; touch-action: pan-x;
+  padding: 2px 24px 8px; overscroll-behavior-x: contain; align-items: flex-start;
+}
+.carousel::-webkit-scrollbar { display: none; }
+.card {
+  flex: 0 0 auto; width: calc(100vw - 48px); max-width: 520px; min-width: 0; scroll-snap-align: center; scroll-snap-stop: always;
+  background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 12px 12px 14px;
+  display: flex; flex-direction: column; gap: 12px; transition: border-color .2s ease, opacity .2s ease;
+}
+.card.next { border-color: rgba(255,212,126,.6); }
+.card.here { border-color: var(--you); box-shadow: 0 0 0 1px rgba(77,163,255,.5); }
+.card.done .c-name, .card.done .c-p { opacity: .65; }
+.c-head { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; }
+.num {
+  width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center;
+  font-weight: 700; font-size: 14px; background: var(--pumpkin); color: var(--pumpkin-ink);
+  font-variant-numeric: tabular-nums; flex: none;
+}
+.leg2 .num { background: var(--violet); color: var(--violet-ink); }
+.park .num { background: var(--moss); color: var(--moss-ink); }
+.done .num { background: #5b5065; color: var(--bone); }
+.c-title { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.c-top { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.c-count { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--mist); font-weight: 700; white-space: nowrap; }
+.c-name { margin: 0; font-size: 18px; line-height: 1.2; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.c-meta { display: flex; align-items: center; gap: 5px; font-size: 13px; color: var(--mist); font-variant-numeric: tabular-nums; min-width: 0; }
+.c-meta-t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.arrow { flex: none; width: 15px; height: 15px; color: var(--candle); transition: transform .3s ease; }
+.badge {
+  font-size: 10px; letter-spacing: .08em; text-transform: uppercase; padding: 2px 7px; border-radius: 999px;
+  background: rgba(255,212,126,.15); color: var(--candle); font-weight: 700; white-space: nowrap;
+}
+.badge.here { background: rgba(77,163,255,.18); color: var(--you); }
+.badge.seen { background: rgba(143,191,138,.16); color: var(--moss); }
+.c-body { display: flex; flex-direction: column; gap: 10px; }
+.c-p { margin: 0; font-size: 15px; line-height: 1.45; }
+.c-p.where { color: var(--mist); }
+.lbl { display: block; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--pumpkin); font-weight: 700; margin-bottom: 1px; }
+.leg2 .lbl { color: var(--violet); }
+.park .lbl { color: var(--moss); }
+.where .lbl { color: var(--mist); }
+.c-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 6px;
   min-height: 40px; padding: 6px 14px; border-radius: 999px; cursor: pointer; text-decoration: none;
   font: 700 14px/1.1 var(--font-body); border: 1.5px solid var(--line); background: transparent; color: var(--bone);
+  white-space: nowrap;
 }
-.btn.go { color: var(--candle); border-color: rgba(255,212,126,.45); }
+.btn.go { color: var(--pumpkin-ink); background: var(--candle); border-color: var(--candle); padding: 6px 12px; }
 .btn.solid { background: var(--pumpkin); border-color: var(--pumpkin); color: var(--pumpkin-ink); }
 .btn.seen[aria-pressed="true"] { background: var(--moss); border-color: var(--moss); color: var(--moss-ink); }
 .btn.blue { border-color: var(--you); color: var(--you); }
 .btn.blue[aria-pressed="true"] { background: var(--you); color: #071526; }
 
-/* ---------- list ---------- */
-.list {
-  flex: 1 1 auto; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+/* ---------- full-sheet info ---------- */
+.more {
+  display: flex; flex-direction: column; gap: 26px;
   padding-top: 18px;
   padding-bottom: max(28px, env(safe-area-inset-bottom, 0px));
-  padding-left: max(14px, env(safe-area-inset-left, 0px));
-  padding-right: max(14px, env(safe-area-inset-right, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  max-width: 620px; margin: 0 auto;
 }
-.list-inner { max-width: 620px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+.more-hint { margin: 0; text-align: center; font-size: 12px; color: var(--mist); letter-spacing: .04em; }
+.rows { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; border-top: 1px solid var(--line); }
+.row-btn {
+  width: 100%; display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; text-align: left;
+  padding: 10px 2px; border: 0; border-bottom: 1px solid var(--line); background: transparent; color: var(--bone); cursor: pointer;
+  font: 15px/1.3 var(--font-body);
+}
+.row-btn .num { width: 26px; height: 26px; font-size: 12px; }
+.row-btn .r-tick { color: var(--moss); font-weight: 700; font-size: 13px; }
+.row-btn.next .r-name { font-weight: 700; }
 .setup {
   display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 14px;
   border: 1px solid rgba(77,163,255,.45); background: rgba(77,163,255,.07);
@@ -201,93 +260,39 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--candle); outlin
 }
 .alert .t { font-size: 20px; font-weight: 700; color: var(--pumpkin); font-variant-numeric: tabular-nums; }
 .alert p { margin: 0; font-size: 15px; min-width: 0; }
-
 section { display: flex; flex-direction: column; gap: 12px; }
-.sec-when { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--pumpkin); font-weight: 700; font-variant-numeric: tabular-nums; }
+.sec-when { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--pumpkin); font-weight: 700; }
 .sec-when.leg2 { color: var(--violet); }
 .sec-when.park { color: var(--moss); }
 .sec-when.plain { color: var(--candle); }
 h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 31px; line-height: 1.05; text-wrap: balance; }
 .sec-sub { margin: 0; font-size: 14px; color: var(--mist); }
+.route-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .route-btn {
-  display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 10px 14px;
-  border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 15px; text-align: center;
-  border: 1.5px solid var(--line); color: var(--bone); background: var(--card);
+  display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 2px; min-height: 56px; padding: 10px 12px;
+  border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 15px;
+  border: 1.5px solid var(--line); color: var(--bone); background: var(--card); min-width: 0;
 }
-
-.stops { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
-.stop {
-  border: 1px solid var(--line); border-radius: 14px; background: var(--card);
-  padding: 12px; display: grid; grid-template-columns: 30px 1fr; gap: 10px;
-  scroll-margin-top: 10px; transition: border-color .2s ease, opacity .2s ease;
-}
-.stop.next { border-color: var(--candle); box-shadow: 0 0 0 1px rgba(255,212,126,.3); }
-.stop.here { border-color: var(--you); box-shadow: 0 0 0 1px rgba(77,163,255,.5); }
-.stop.done { opacity: .62; }
-.num {
-  width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; margin-top: 1px;
-  font-weight: 700; font-size: 13px; background: var(--pumpkin); color: var(--pumpkin-ink);
-  font-variant-numeric: tabular-nums;
-}
-.stop.leg2 .num { background: var(--violet); color: var(--violet-ink); }
-.stop.park .num { background: var(--moss); color: var(--moss-ink); }
-.stop.done .num { background: #5b5065; color: var(--bone); }
-.s-body { min-width: 0; display: flex; flex-direction: column; gap: 5px; }
-.s-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
-.s-time { font-size: 14px; font-weight: 700; color: var(--candle); font-variant-numeric: tabular-nums; }
-.s-name { margin: 0; font-size: 18px; line-height: 1.25; font-weight: 700; }
-.badge {
-  font-size: 11px; letter-spacing: .08em; text-transform: uppercase; padding: 2px 7px; border-radius: 999px;
-  background: rgba(255,212,126,.15); color: var(--candle); font-weight: 700;
-}
-.badge.here { background: rgba(77,163,255,.18); color: var(--you); }
-.s-p { margin: 0; font-size: 15px; }
-.s-p.where { color: var(--mist); }
-.lbl { display: block; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--pumpkin); font-weight: 700; }
-.leg2 .lbl { color: var(--violet); }
-.park .lbl { color: var(--moss); }
-.where .lbl { color: var(--mist); }
-.s-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
-
+.route-btn small { font-weight: 400; font-size: 12px; color: var(--mist); }
 .park-card { border: 1px solid var(--line); border-radius: 14px; background: var(--card-2); padding: 14px; }
 .park-card ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: 15px; }
-
-.picks { display: flex; flex-direction: column; gap: 10px; }
 .pick { border: 1px solid var(--line); border-radius: 14px; background: var(--card); padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
 .pick h3 { margin: 0; font-size: 17px; }
 .pick p { margin: 0; font-size: 14px; color: var(--mist); }
 .pick .btn { align-self: flex-start; }
-
 .notes ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: var(--mist); }
 .small { font-size: 12px; color: var(--mist); margin: 0; }
 .linkbtn { background: none; border: 0; padding: 0; color: var(--mist); text-decoration: underline; cursor: pointer; font-size: 14px; align-self: flex-start; }
 
-/* ---------- arrival sheet + toast ---------- */
-.arrive {
-  position: fixed; z-index: 1000; left: 0; right: 0; bottom: 0;
-  padding-top: 16px;
-  padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
-  padding-left: max(16px, env(safe-area-inset-left, 0px));
-  padding-right: max(16px, env(safe-area-inset-right, 0px));
-  background: var(--card-2); border-top: 2px solid var(--you); border-radius: 18px 18px 0 0;
-  box-shadow: 0 -10px 30px rgba(0,0,0,.55);
-  display: flex; flex-direction: column; gap: 8px;
-  animation: rise .25s ease-out;
-}
-@keyframes rise { from { transform: translateY(30px); opacity: 0; } to { transform: none; opacity: 1; } }
-.arrive .eyebrow { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--you); font-weight: 700; }
-.arrive h3 { margin: 0; font-size: 23px; line-height: 1.2; }
-.arrive p { margin: 0; font-size: 15px; }
-.arrive .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
-#arr-seen { background: var(--moss); border-color: var(--moss); color: var(--moss-ink); min-width: 120px; }
-
 .toast {
   position: fixed; z-index: 1001; left: 50%; transform: translateX(-50%);
-  bottom: max(16px, env(safe-area-inset-bottom, 0px)); width: max-content; max-width: calc(100% - 32px);
+  top: calc(max(10px, env(safe-area-inset-top, 0px)) + 58px); width: max-content; max-width: calc(100% - 32px);
   background: var(--card-2); color: var(--bone); border: 1px solid var(--line); border-radius: 12px;
-  padding: 10px 14px; font-size: 14px; box-shadow: 0 6px 20px rgba(0,0,0,.45);
+  padding: 10px 14px; font-size: 14px; font-weight: 700; box-shadow: 0 6px 20px rgba(0,0,0,.45);
+  animation: drop .25s ease-out;
 }
-
+@keyframes drop { from { transform: translate(-50%, -10px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+#sab { position: fixed; left: 0; bottom: 0; width: 1px; height: env(safe-area-inset-bottom, 0px); visibility: hidden; pointer-events: none; }
 
 /* ---------- opening scene ---------- */
 .intro {
@@ -369,12 +374,13 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
 @keyframes leave { to { opacity: 0; transform: scale(1.05); filter: blur(6px); } }
 
 @media (min-width: 900px) {
-  .app { display: grid; grid-template-columns: 1fr 440px; grid-template-rows: auto auto 1fr; }
-  .top { grid-column: 1 / -1; }
-  .map-wrap { grid-column: 1; grid-row: 2 / 4; min-height: 0; }
-  .nextbar { grid-column: 2; grid-row: 2; }
-  .list { grid-column: 2; grid-row: 3; min-height: 0; }
-  #btn-big { display: none; }
+  .sheet { top: 12px; left: 12px; bottom: 12px; right: auto; width: 420px; border-radius: 18px; border: 1px solid var(--line); transform: none !important; }
+  .sheet-scroll { overflow-y: auto; border-radius: 18px; }
+  .handle { display: none; }
+  .card { width: 360px; }
+  .carousel { padding: 12px 18px 8px; }
+  .legend, .map-note { left: 446px; }
+  .map-btns { bottom: 26px !important; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }
@@ -396,117 +402,103 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
     <div class="progress" role="progressbar" aria-label="Stops seen" aria-valuemin="0" aria-valuemax="16" aria-valuenow="0" id="progress"><span id="progress-bar"></span></div>
   </header>
 
-  <div class="map-wrap">
+  <div class="stage" id="stage">
     <div id="map" role="region" aria-label="Map of the walk"></div>
-    <div class="map-note" id="map-note"></div>
     <div class="legend" aria-hidden="true">
       <span><i style="background:#e8751a"></i>Before the park</span>
       <span><i style="background:#8456ee"></i>After the park</span>
     </div>
-    <div class="map-btns">
+    <div class="map-note" id="map-note"></div>
+    <div class="map-btns" id="map-btns">
       <button type="button" class="map-btn" id="btn-me" aria-pressed="false" aria-label="Follow my location">
         <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="currentColor"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
       </button>
       <button type="button" class="map-btn" id="btn-fit" aria-label="Show the whole route">
         <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
       </button>
-      <button type="button" class="map-btn" id="btn-big" aria-pressed="false" aria-label="Make the map bigger">
-        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path id="big-icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M7 10l5 5 5-5"/></svg>
-      </button>
     </div>
-  </div>
 
-  <div class="nextbar" id="nextbar" aria-live="polite">
-    <div class="left">
-      <span class="nb-eyebrow" id="nb-eyebrow">Next stop</span>
-      <span class="nb-name" id="nb-name"></span>
-      <span class="nb-meta"><svg class="arrow" id="nb-arrow" viewBox="0 0 24 24" aria-hidden="true" hidden><path fill="currentColor" d="M12 2l7 18-7-4-7 4z"/></svg><span id="nb-meta"></span></span>
-    </div>
-    <a class="btn go" id="nb-go" href="#" target="_blank" rel="noopener">Directions</a>
-  </div>
-
-  <main class="list" id="list">
-    <div class="list-inner">
-      <div class="setup" id="setup">
-        <p id="setup-text">Turn on your location to see yourself on the map, get distances to each stop, and a pop-up when you arrive.</p>
-        <div class="row">
-          <button type="button" class="btn blue" id="btn-locate">Show my location</button>
-          <button type="button" class="btn blue" id="btn-wake" aria-pressed="false" hidden>Keep screen on</button>
+    <section class="sheet" id="sheet" data-state="peek" aria-label="Stops and plan">
+      <div class="sheet-scroll" id="sheet-scroll">
+        <button type="button" class="handle" id="handle" aria-label="Show more of the stop"><span></span></button>
+        <div class="rush" id="rush" hidden role="status">
+          <div><b id="rush-title">Leave for the gate soon</b><span id="rush-meta"></span></div>
+          <a class="btn" id="rush-go" target="_blank" rel="noopener" href="#">Directions</a>
         </div>
-      </div>
+        <div class="carousel" id="carousel" aria-label="Stops, swipe for the next one"></div>
 
-      <div class="alert">
-        <span class="t">6:55pm</span>
-        <p>Be at the Holland Park gates on Kensington High Street. 7pm is the last entry slot. Don’t arrive more than 5 minutes early.</p>
-      </div>
+        <div class="more" id="more">
+          <p class="more-hint">Swipe the cards for each stop. Everything else is below.</p>
 
-      <section id="sec-leg1">
-        <span class="sec-when">Route 1 · Before the park</span>
-        <h2>Kensington’s showpiece houses</h2>
-        <p class="sec-sub">Start at High Street Kensington tube. About 3 km, so roughly 40 minutes of walking. Setting off around 4:45 leaves plenty of time to stroll.</p>
-        <a class="route-btn" id="route1" target="_blank" rel="noopener" href="#">Open Route 1 in Google Maps</a>
-        <ol class="stops" id="stops-leg1"></ol>
-      </section>
+          <section>
+            <span class="sec-when plain">All stops</span>
+            <ol class="rows" id="rows"></ol>
+          </section>
 
-      <section id="sec-park">
-        <span class="sec-when park">Your 7pm booking</span>
-        <h2>The Playful Park of Peculiar</h2>
-        <div class="park-card">
-          <ul>
-            <li>Have your booking email open. The queue forms just inside the main gates.</li>
-            <li>The one-way trail takes about 30 minutes. Food and drink stalls are near the end.</li>
-            <li>No toilets in the park. The Design Museum next to the gate is the nearest.</li>
-            <li>You leave at the top of the park, at the end of the cycle path. Route 2 starts there.</li>
-          </ul>
-        </div>
-      </section>
-
-      <section id="sec-leg2">
-        <span class="sec-when leg2">Route 2 · After the park</span>
-        <h2>Notting Hill’s crescents</h2>
-        <p class="sec-sub">From the park exit to Notting Hill Gate for tea. About 3 km, so 40-odd minutes at an easy pace.</p>
-        <a class="route-btn" id="route2" target="_blank" rel="noopener" href="#">Open Route 2 in Google Maps</a>
-        <ol class="stops" id="stops-leg2"></ol>
-      </section>
-
-      <section>
-        <span class="sec-when plain">After tea</span>
-        <h2>A nightcap nearby</h2>
-        <div class="picks">
-          <div class="pick">
-            <h3>The Churchill Arms</h3>
-            <p>Autumn display outside, Thai food inside, on Kensington Church Street.</p>
-            <a class="btn go" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&amp;destination=The%20Churchill%20Arms%2C%20119%20Kensington%20Church%20Street%2C%20London%20W8%207LN&amp;travelmode=walking">Directions</a>
+          <div class="setup" id="setup">
+            <p id="setup-text">Turn on your location to see yourself on the map, get distances to each stop, and a heads-up when you arrive.</p>
+            <div class="row">
+              <button type="button" class="btn blue" id="btn-locate">Show my location</button>
+              <button type="button" class="btn blue" id="btn-wake" aria-pressed="false" hidden>Keep screen on</button>
+            </div>
           </div>
+
+          <div class="alert">
+            <span class="t">6:55pm</span>
+            <p>Be at the Holland Park gates on Kensington High Street. 7pm is the last entry slot. Don’t arrive more than 5 minutes early.</p>
+          </div>
+
+          <section>
+            <span class="sec-when plain">Turn-by-turn</span>
+            <div class="route-btns">
+              <a class="route-btn" id="route1" target="_blank" rel="noopener" href="#">Route 1 in Google Maps<small>Kensington, before the park</small></a>
+              <a class="route-btn" id="route2" target="_blank" rel="noopener" href="#">Route 2 in Google Maps<small>Notting Hill, after the park</small></a>
+            </div>
+          </section>
+
+          <section>
+            <span class="sec-when park">Your 7pm booking</span>
+            <h2>The Playful Park of Peculiar</h2>
+            <div class="park-card">
+              <ul>
+                <li>Have your booking email open. The queue forms just inside the main gates.</li>
+                <li>The one-way trail takes about 30 minutes. Food and drink stalls are near the end.</li>
+                <li>No toilets in the park. The Design Museum next to the gate is the nearest.</li>
+                <li>You leave at the top of the park, at the end of the cycle path. Route 2 starts there.</li>
+              </ul>
+            </div>
+          </section>
+
+          <section>
+            <span class="sec-when plain">After tea</span>
+            <h2>A nightcap nearby</h2>
+            <div class="pick">
+              <h3>The Churchill Arms</h3>
+              <p>Autumn display outside, Thai food inside, on Kensington Church Street.</p>
+              <a class="btn" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&amp;destination=The%20Churchill%20Arms%2C%20119%20Kensington%20Church%20Street%2C%20London%20W8%207LN&amp;travelmode=walking">Directions</a>
+            </div>
+          </section>
+
+          <section class="notes">
+            <h2>Before you go</h2>
+            <ul>
+              <li>Dry tonight, but down to about 6°C. Warm layers and comfy shoes.</li>
+              <li>These are people’s homes. Enjoy the displays from the pavement.</li>
+              <li>Your location stays on your phone. Nobody else in the group can see where you are.</li>
+              <li>On iPhone, tap Share then Add to Home Screen to open this like an app.</li>
+              <li>Displays can change on the night, so keep an eye out on the streets in between.</li>
+            </ul>
+            <button type="button" class="linkbtn" id="reset">Clear all ticks</button>
+            <button type="button" class="linkbtn" id="replay-intro">Replay the intro</button>
+            <p class="small">Displays from Claire &amp; The City’s 2026 guide, Londonist’s 22 October walk and Instagram walk posts. Park details from Kensington’s Halloween FAQ. Map © OpenFreeMap, © OpenMapTiles, © OpenStreetMap contributors. Walking routes from FOSSGIS / OSRM.</p>
+          </section>
         </div>
-      </section>
-
-      <section class="notes">
-        <h2>Before you go</h2>
-        <ul>
-          <li>Dry tonight, but down to about 6°C. Warm layers and comfy shoes.</li>
-          <li>These are people’s homes. Enjoy the displays from the pavement.</li>
-          <li>Your location stays on your phone. Nobody else in the group can see where you are.</li>
-          <li>On iPhone, tap Share then Add to Home Screen to open this like an app.</li>
-          <li>Displays can change on the night, so keep an eye out on the streets in between.</li>
-        </ul>
-        <button type="button" class="linkbtn" id="reset">Clear all ticks</button>
-        <button type="button" class="linkbtn" id="replay-intro">Replay the intro</button>
-        <p class="small">Displays from Claire &amp; The City’s 2026 guide, Londonist’s 22 October walk and Instagram walk posts. Park details from Kensington’s Halloween FAQ. Map © OpenFreeMap, © OpenMapTiles, © OpenStreetMap contributors. Walking routes from FOSSGIS / OSRM.</p>
-      </section>
-    </div>
-  </main>
-</div>
-
-<div class="arrive" id="arrive" hidden role="dialog" aria-labelledby="arr-name">
-  <span class="eyebrow">You’ve arrived</span>
-  <h3 id="arr-name"></h3>
-  <p id="arr-look"></p>
-  <div class="row">
-    <button type="button" class="btn seen" id="arr-seen" aria-pressed="false">Seen it</button>
-    <button type="button" class="btn" id="arr-close">Close</button>
+      </div>
+    </section>
   </div>
 </div>
+
+<div id="sab" aria-hidden="true"></div>
 <div class="toast" id="toast" hidden role="status"></div>
 <div class="intro" id="intro" hidden role="dialog" aria-modal="true" aria-labelledby="intro-title">
   <div class="fog f2" aria-hidden="true"></div>
@@ -678,43 +670,213 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
   }
   function target() { return gateRush() ? BY_ID.gate : nextStop(); }
 
-  /* ---------- list ---------- */
+  /* ---------- stop cards (swipeable) and all-stops list ---------- */
+  var stage = $("stage"), sheet = $("sheet"), scroller = $("sheet-scroll"), carousel = $("carousel");
+  var cards = [], rows = [];
+  var activeIdx = 0, sheetState = "peek", suppressClickUntil = 0;
+  var wideMq = window.matchMedia ? window.matchMedia("(min-width: 900px)") : { matches: false };
+  var LEG_NAMES = { 1: "Before the park", 0: "The park", 2: "After the park" };
+
   function buildCard(s) {
-    var li = document.createElement("li");
-    li.className = "stop " + legClass(s);
-    li.id = "stop-" + s.id;
-    li.innerHTML =
-      '<span class="num"></span>' +
-      '<div class="s-body">' +
-        '<div class="s-head"><h3 class="s-name"></h3><span class="badge" hidden></span></div>' +
-        '<p class="s-p look"><span class="lbl">Look for</span><span class="t-look"></span></p>' +
-        '<p class="s-p where"><span class="lbl">You’re there when</span><span class="t-where"></span></p>' +
-        '<div class="s-actions">' +
-          '<button type="button" class="btn show">Show on map</button>' +
-          '<a class="btn go" target="_blank" rel="noopener">Directions</a>' +
+    var c = document.createElement("article");
+    c.className = "card " + legClass(s);
+    c.id = "card-" + s.id;
+    c.setAttribute("aria-label", "Stop " + s.n + ": " + s.name);
+    c.innerHTML =
+      '<div class="c-head">' +
+        '<span class="num"></span>' +
+        '<div class="c-title">' +
+          '<div class="c-top"><span class="c-count"></span><span class="badge" hidden></span></div>' +
+          '<h3 class="c-name"></h3>' +
+          '<div class="c-meta"><svg class="arrow" viewBox="0 0 24 24" aria-hidden="true" hidden><path fill="currentColor" d="M12 2l7 18-7-4-7 4z"/></svg><span class="c-meta-t"></span></div>' +
+        '</div>' +
+        '<a class="btn go" target="_blank" rel="noopener">Go</a>' +
+      '</div>' +
+      '<div class="c-body">' +
+        '<p class="c-p look"><span class="lbl">Look for</span><span class="t-look"></span></p>' +
+        '<p class="c-p where"><span class="lbl">You’re there when</span><span class="t-where"></span></p>' +
+        '<div class="c-actions">' +
           '<button type="button" class="btn seen" aria-pressed="false">Seen it</button>' +
+          '<button type="button" class="btn c-next">Next stop</button>' +
         '</div>' +
       '</div>';
-    li.querySelector(".num").textContent = s.n;
-    li.querySelector(".s-name").textContent = s.name;
-    li.querySelector(".t-look").textContent = s.look;
-    li.querySelector(".t-where").textContent = s.where;
-    li.querySelector(".go").href = dirUrl(s);
-    if (s.book) {
-      var a = document.createElement("a");
-      a.className = "btn solid"; a.target = "_blank"; a.rel = "noopener"; a.href = s.book; a.textContent = "Book a table";
-      li.querySelector(".s-actions").insertBefore(a, li.querySelector(".seen"));
-    }
-    li.querySelector(".show").addEventListener("click", function () { focusStop(s); });
-    li.querySelector(".seen").addEventListener("click", function () { toggleSeen(s.id); });
+    c.querySelector(".num").textContent = s.n;
+    c.querySelector(".c-count").textContent = "Stop " + s.n + " of " + STOPS.length;
+    c.querySelector(".c-name").textContent = s.name;
+    c.querySelector(".t-look").textContent = s.look;
+    c.querySelector(".t-where").textContent = s.where;
+    var go = c.querySelector(".go");
+    go.href = dirUrl(s);
+    go.setAttribute("aria-label", "Directions to " + s.name);
+    if (s.idx === STOPS.length - 1) c.querySelector(".c-next").hidden = true;
+    c.querySelector(".seen").addEventListener("click", function () { toggleSeen(s.id, true); });
+    c.querySelector(".c-next").addEventListener("click", function () { selectStop(STOPS[s.idx + 1], { frame: true }); });
+    c.addEventListener("click", function (ev) {
+      if (Date.now() < suppressClickUntil || ev.target.closest("a, button")) return;
+      if (s.idx !== activeIdx) selectStop(s, {});
+      else if (sheetState === "peek") setSheet("half");
+    });
+    return c;
+  }
+  function buildRow(s) {
+    var li = document.createElement("li");
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "row-btn " + legClass(s); b.id = "row-" + s.id;
+    b.innerHTML = '<span class="num"></span><span class="r-name"></span><span class="r-tick"></span>';
+    b.querySelector(".num").textContent = s.n;
+    b.querySelector(".r-name").textContent = s.name;
+    b.addEventListener("click", function () { selectStop(s, { state: "half", smooth: false }); });
+    li.appendChild(b);
     return li;
   }
   STOPS.forEach(function (s) {
-    var list = (s.leg === 2 || s.id === "exit") ? $("stops-leg2") : $("stops-leg1");
-    list.appendChild(buildCard(s));
+    var c = buildCard(s); carousel.appendChild(c); cards.push(c);
+    var r = buildRow(s); $("rows").appendChild(r); rows.push(r.firstChild);
   });
   $("route1").href = ROUTE1_URL;
   $("route2").href = ROUTE2_URL;
+
+  /* which card is centred in the carousel */
+  function nearestCard() {
+    var mid = carousel.scrollLeft + carousel.clientWidth / 2, best = 0, bd = Infinity;
+    cards.forEach(function (c, i) {
+      var d = Math.abs(c.offsetLeft + c.offsetWidth / 2 - mid);
+      if (d < bd) { bd = d; best = i; }
+    });
+    return best;
+  }
+  function scrollToIdx(i, smooth) {
+    var c = cards[i];
+    if (!c) return;
+    var left = c.offsetLeft - (carousel.clientWidth - c.offsetWidth) / 2;
+    if (carousel.scrollTo) carousel.scrollTo({ left: left, behavior: smooth ? "smooth" : "auto" });
+    else carousel.scrollLeft = left;
+  }
+  var scrollTimer = null;
+  carousel.addEventListener("scroll", function () {
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(function () {
+      var i = nearestCard();
+      if (i !== activeIdx) {
+        activeIdx = i;
+        setFollow(false);
+        showStopOnMap(STOPS[i]);
+        render();
+        applySheet(false);
+      }
+    }, 110);
+  }, { passive: true });
+
+  function selectStop(s, opts) {
+    if (!s) return;
+    opts = opts || {};
+    activeIdx = s.idx;
+    scrollToIdx(s.idx, opts.smooth !== false);
+    render();
+    if (opts.state && !wideMq.matches) setSheet(opts.state); else applySheet(true);
+    if (opts.camera !== false) {
+      setFollow(false);
+      if (opts.frame) frameWithMe(s); else showStopOnMap(s);
+    }
+  }
+
+  /* ---------- bottom sheet: peek / half / full ---------- */
+  var STATES = ["full", "half", "peek"];
+  function sab() { return $("sab").offsetHeight || 0; }
+  function sheetH() { return sheet.offsetHeight; }
+  function visibleFor(state) {
+    var H = sheetH();
+    if (wideMq.matches || state === "full") return H;
+    var card = cards[activeIdx], head = card ? card.querySelector(".c-head") : null;
+    var top = carousel.offsetTop + 2;
+    if (state === "peek") return Math.min(H, top + (head ? head.offsetHeight + 14 : 80) + 10 + sab());
+    return Math.min(Math.round(H * 0.74), top + (card ? card.offsetHeight : 260) + 14 + sab());
+  }
+  function translateFor(state) { return Math.max(0, sheetH() - visibleFor(state)); }
+  function applySheet(animate) {
+    sheet.classList.toggle("anim", animate !== false);
+    sheet.setAttribute("data-state", wideMq.matches ? "full" : sheetState);
+    sheet.style.transform = wideMq.matches ? "" : "translateY(" + translateFor(sheetState) + "px)";
+    if (sheetState !== "full") scroller.scrollTop = 0;
+    $("handle").setAttribute("aria-label", sheetState === "full" ? "Show the map again" : "Show more of the stop");
+    placeMapUi();
+  }
+  function setSheet(state) { sheetState = state; applySheet(true); }
+  function cycleSheet() { setSheet(sheetState === "peek" ? "half" : sheetState === "half" ? "full" : "peek"); }
+
+  /* map controls sit just above the sheet, and the camera keeps stops clear of it */
+  var mapPad = { top: 60, bottom: 200, left: 30, right: 74 };
+  function placeMapUi() {
+    var vis = visibleFor(sheetState), stageH = stage.clientHeight;
+    var covered = wideMq.matches ? 0 : Math.min(vis + 10, stageH);
+    var btns = $("map-btns");
+    btns.classList.toggle("away", !wideMq.matches && sheetState === "full");
+    if (!wideMq.matches) btns.style.bottom = Math.min(covered + 12, stageH - 120) + "px";
+    mapPad = wideMq.matches
+      ? { top: 60, bottom: 40, left: 460, right: 74 }
+      : { top: 60, bottom: Math.min(covered + 20, stageH * 0.7), left: 30, right: 74 };
+  }
+
+  /* dragging: from the handle anywhere, or vertically on the cards */
+  var drag = null;
+  function onDown(ev) {
+    if (wideMq.matches) return;
+    if (ev.pointerType === "mouse" && ev.button !== 0) return;
+    drag = { id: ev.pointerId, x0: ev.clientX, y0: ev.clientY, t0: Date.now(), base: translateFor(sheetState),
+             handle: ev.currentTarget === $("handle"), active: false, el: ev.currentTarget, y: null };
+  }
+  function onMove(ev) {
+    if (!drag || ev.pointerId !== drag.id) return;
+    var dx = ev.clientX - drag.x0, dy = ev.clientY - drag.y0;
+    if (!drag.active) {
+      if (Math.abs(dy) < 7) return;
+      if (!drag.handle && Math.abs(dx) > Math.abs(dy)) { drag = null; return; }
+      if (sheetState === "full" && !drag.handle && dy < 0) { drag = null; return; }
+      drag.active = true;
+      sheet.classList.remove("anim");
+      try { drag.el.setPointerCapture(ev.pointerId); } catch (e) {}
+    }
+    var maxY = translateFor("peek") + 30;
+    var y = Math.max(0, Math.min(maxY, drag.base + dy));
+    drag.y = y; drag.dy = dy;
+    sheet.style.transform = "translateY(" + y + "px)";
+    if (ev.cancelable) ev.preventDefault();
+  }
+  function onUp(ev) {
+    if (!drag || (ev && ev.pointerId !== drag.id)) return;
+    var d = drag; drag = null;
+    if (!d.active) {
+      if (d.handle && ev && ev.type === "pointerup") cycleSheet();
+      return;
+    }
+    suppressClickUntil = Date.now() + 350;
+    var v = d.dy / Math.max(1, Date.now() - d.t0);           /* px per ms, positive = downwards */
+    var pick = null, best = Infinity;
+    if (v < -0.45) {          /* flicked up: the next resting point above where it was let go */
+      STATES.forEach(function (st) { var ty = translateFor(st); if (ty < d.y - 8 && d.y - ty < best) { best = d.y - ty; pick = st; } });
+      pick = pick || "full";
+    } else if (v > 0.45) {    /* flicked down: the next resting point below */
+      STATES.forEach(function (st) { var ty = translateFor(st); if (ty > d.y + 8 && ty - d.y < best) { best = ty - d.y; pick = st; } });
+      pick = pick || "peek";
+    } else {
+      STATES.forEach(function (st) { var dd = Math.abs(translateFor(st) - d.y); if (dd < best) { best = dd; pick = st; } });
+    }
+    setSheet(pick);
+  }
+  [$("handle"), carousel].forEach(function (el) {
+    el.addEventListener("pointerdown", onDown);
+  });
+  window.addEventListener("pointermove", onMove, { passive: false });
+  window.addEventListener("pointerup", onUp);
+  window.addEventListener("pointercancel", function (ev) { if (drag && !drag.active) drag = null; else onUp(ev); });
+  $("handle").addEventListener("keydown", function (ev) {
+    if (ev.key === "ArrowUp") { ev.preventDefault(); setSheet(STATES[Math.max(0, STATES.indexOf(sheetState) - 1)]); }
+    if (ev.key === "ArrowDown") { ev.preventDefault(); setSheet(STATES[Math.min(2, STATES.indexOf(sheetState) + 1)]); }
+  });
+  $("handle").addEventListener("click", function (ev) {
+    /* keyboard and assistive-tech activation (pointer taps are handled in onUp) */
+    if (ev.detail === 0) cycleSheet();
+  });
 
   /* ---------- map ---------- */
   /* Clean street style from OpenFreeMap (no key), drawn by MapLibre. Plain OpenStreetMap tiles are the fallback. */
@@ -766,7 +928,7 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
       wrap.addEventListener("click", function (ev) {
         ev.stopPropagation();
         showLabel(s, label);
-        if (s !== START && !$("app").classList.contains("map-big")) scrollToCard(s);
+        if (s !== START) selectStop(s, { state: sheetState === "full" ? "half" : sheetState, camera: false });
       });
       return { wrap: wrap, pin: pin, mk: mk };
     };
@@ -817,15 +979,15 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
         store(cacheKey, JSON.stringify(ll));
       }).catch(function () {
         clearTimeout(timer);
-        $("map-note").textContent = "Dotted lines show the order of stops. Use Directions for turn-by-turn.";
+        $("map-note").textContent = "Dotted lines show the order of stops. Tap Go for turn-by-turn.";
       });
     });
 
     map.on("dragstart", function () { setFollow(false); });
     map.on("click", function () { if (popup) { popup.remove(); popup = null; } });
   } else {
-    $("map").innerHTML = '<p style="padding:16px;color:#5b5065;margin:0">The map couldn’t load. Check your signal and reload. The stop list and Directions buttons still work.</p>';
-    $("btn-fit").hidden = true; $("btn-big").hidden = true;
+    $("map").innerHTML = '<p style="padding:16px;color:#5b5065;margin:0">The map couldn’t load. Check your signal and reload. The stop cards and Go buttons still work.</p>';
+    $("btn-fit").hidden = true;
   }
 
   function showLabel(s, text) {
@@ -834,95 +996,101 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
     popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false, offset: 20, anchor: "bottom", className: "hw-pop" })
       .setLngLat(lngLat(s)).setText(text).addTo(map);
   }
-  function focusStop(s) {
-    if (!map) return;
-    setFollow(false);
-    map.flyTo({ center: lngLat(s), zoom: 17, speed: 1.4 });
-    showLabel(s, s.n + " · " + s.name);
+  function showStopOnMap(s) {
+    if (!map || !s) return;
+    map.flyTo({ center: lngLat(s), zoom: 16.6, padding: mapPad, speed: 1.4 });
   }
-  function scrollToCard(s) {
-    var el = $("stop-" + s.id);
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  function frameWithMe(s) {
+    if (!map || !s) return;
+    if (!lastPos) { showStopOnMap(s); return; }
+    var b = new maplibregl.LngLatBounds([lastPos.lng, lastPos.lat], [lastPos.lng, lastPos.lat]);
+    b.extend(lngLat(s));
+    if (map.setPadding) map.setPadding({ top: 0, bottom: 0, left: 0, right: 0 });
+    map.fitBounds(b, { padding: mapPad, maxZoom: 17.2, duration: 900 });
   }
-
-  $("btn-fit").addEventListener("click", function () {
+  function fitRoute(animate) {
     if (!map) return;
-    setFollow(false);
-    map.fitBounds(routeBounds, { padding: 40 });
-  });
-  $("btn-big").addEventListener("click", function () {
-    var big = $("app").classList.toggle("map-big");
-    this.setAttribute("aria-pressed", big ? "true" : "false");
-    this.setAttribute("aria-label", big ? "Make the map smaller" : "Make the map bigger");
-    $("big-icon").setAttribute("d", big ? "M7 14l5-5 5 5" : "M7 10l5 5 5-5");
-    setTimeout(function () { if (map) map.resize(); }, 280);
-  });
+    if (map.setPadding) map.setPadding({ top: 0, bottom: 0, left: 0, right: 0 });
+    map.fitBounds(routeBounds, { padding: mapPad, duration: animate === false ? 0 : 700 });
+  }
+  $("btn-fit").addEventListener("click", function () { setFollow(false); fitRoute(true); });
 
   /* ---------- seen ---------- */
-  function toggleSeen(id) {
-    if (seen[id]) delete seen[id]; else seen[id] = 1;
+  function toggleSeen(id, advance) {
+    var nowSeen = !seen[id];
+    if (nowSeen) seen[id] = 1; else delete seen[id];
     saveSeen(); render();
+    if (nowSeen && advance) {
+      var nx = target();
+      if (nx && nx.id !== id) {
+        setTimeout(function () {
+          selectStop(nx, { frame: true });
+          var extra = lastPos ? " · " + fmtDist(dist(lastPos.lat, lastPos.lng, nx.lat, nx.lng)) : "";
+          toast("Next: " + nx.name + extra);
+        }, 450);
+      } else if (!nx) toast("That’s every stop. Happy Halloween!");
+    }
   }
 
   /* ---------- render ---------- */
+  var rushWas = false;
   function render() {
-    var nx = nextStop(), tg = target(), count = 0;
-    STOPS.forEach(function (s) {
-      var done = !!seen[s.id];
+    var tg = target(), count = 0;
+    STOPS.forEach(function (s, i) {
+      var done = !!seen[s.id], isTarget = !!tg && tg.id === s.id, isHere = !!here && here.id === s.id;
       if (done) count++;
-      var li = $("stop-" + s.id);
-      li.classList.toggle("done", done);
-      li.classList.toggle("next", !!tg && tg.id === s.id);
-      li.classList.toggle("here", !!here && here.id === s.id);
-      var b = li.querySelector(".seen");
+      var c = cards[i];
+      c.classList.toggle("done", done);
+      c.classList.toggle("next", isTarget);
+      c.classList.toggle("here", isHere);
+      var b = c.querySelector(".seen");
       b.setAttribute("aria-pressed", done ? "true" : "false");
       b.textContent = done ? "✓ Seen" : "Seen it";
-      var badge = li.querySelector(".badge");
-      if (here && here.id === s.id) { badge.hidden = false; badge.className = "badge here"; badge.textContent = "You’re here"; }
-      else if (tg && tg.id === s.id) { badge.hidden = false; badge.className = "badge"; badge.textContent = "Next"; }
+      var badge = c.querySelector(".badge");
+      if (isHere) { badge.hidden = false; badge.className = "badge here"; badge.textContent = "You’re here"; }
+      else if (isTarget) { badge.hidden = false; badge.className = "badge"; badge.textContent = "Next"; }
+      else if (done) { badge.hidden = false; badge.className = "badge seen"; badge.textContent = "Seen"; }
       else badge.hidden = true;
+      var arrow = c.querySelector(".arrow"), meta = c.querySelector(".c-meta-t");
+      if (lastPos && !isHere) {
+        var d = dist(lastPos.lat, lastPos.lng, s.lat, s.lng), br = bearing(lastPos.lat, lastPos.lng, s.lat, s.lng);
+        arrow.hidden = false;
+        arrow.style.transform = "rotate(" + Math.round(br) + "deg)";
+        meta.textContent = fmtDist(d) + " " + compass(br) + " · " + walkMins(d) + " min walk";
+      } else {
+        arrow.hidden = true;
+        meta.textContent = isHere ? "Have a look, then tap Seen it" : LEG_NAMES[s.leg];
+      }
+      var row = rows[i];
+      row.classList.toggle("next", isTarget);
+      row.querySelector(".r-tick").textContent = done ? "✓ Seen" : (isTarget ? "Next" : "");
       if (markers[s.id]) {
-        markers[s.id].pin.className = pinClass(s, (done ? " done" : "") + (tg && tg.id === s.id ? " next" : ""));
-        markers[s.id].wrap.style.zIndex = (tg && tg.id === s.id) ? "3" : "1";
+        markers[s.id].pin.className = pinClass(s, (done ? " done" : "") + (isTarget ? " next" : "") + (i === activeIdx ? " active" : ""));
+        markers[s.id].wrap.style.zIndex = i === activeIdx ? "4" : (isTarget ? "3" : "1");
       }
     });
     $("progress-bar").style.width = (count / STOPS.length * 100) + "%";
     $("progress").setAttribute("aria-valuenow", String(count));
-    renderNextBar(tg);
+    renderRush();
     renderChip();
   }
 
-  function renderNextBar(tg) {
-    var bar = $("nextbar"), go = $("nb-go"), arrow = $("nb-arrow");
-    var rush = gateRush();
-    bar.classList.toggle("urgent", rush);
-    if (!tg) {
-      $("nb-eyebrow").textContent = "All done";
-      $("nb-name").textContent = "Happy Halloween!";
-      $("nb-meta").textContent = "Every stop ticked off.";
-      go.hidden = true; arrow.hidden = true;
-      return;
+  function renderRush() {
+    var rush = gateRush(), box = $("rush"), g = BY_ID.gate;
+    if (rush) {
+      var now = nowMins(), spare = now !== null ? GATE_MINS - now - minsToGate() : 0;
+      $("rush-title").textContent = spare > 2 ? "Leave for the gate in " + spare + " min" : "Head to the gate now";
+      $("rush-meta").textContent = lastPos
+        ? fmtDist(dist(lastPos.lat, lastPos.lng, g.lat, g.lng)) + " · " + minsToGate() + " min walk · last entry 7pm"
+        : "Last entry is 7pm";
+      $("rush-go").href = dirUrl(g);
     }
-    go.hidden = false;
-    go.href = dirUrl(tg);
-    var isHere = here && here.id === tg.id;
-    var now = nowMins();
-    var spare = (rush && now !== null) ? GATE_MINS - now - minsToGate() : 0;
-    $("nb-eyebrow").textContent = rush ? (spare > 2 ? "Leave for the gate in " + spare + " min" : "Head to the gate now")
-      : (isHere ? "You’re here" : "Next stop");
-    $("nb-name").textContent = tg.n + "  " + tg.name;
-
-    if (lastPos && !isHere) {
-      var d = dist(lastPos.lat, lastPos.lng, tg.lat, tg.lng);
-      var b = bearing(lastPos.lat, lastPos.lng, tg.lat, tg.lng);
-      arrow.hidden = false;
-      arrow.style.transform = "rotate(" + Math.round(b) + "deg)";
-      $("nb-meta").textContent = fmtDist(d) + " " + compass(b) + " · " + walkMins(d) + " min walk";
-    } else {
-      arrow.hidden = true;
-      $("nb-meta").textContent = isHere ? "Tick it off when you’ve had a look." :
-        (rush ? "Last entry is 7pm. Tap Directions for the quickest way." : "Turn on your location for distances.");
+    if (box.hidden === rush) {
+      box.hidden = !rush;
+      applySheet(false);
+      if (rush && !rushWas) selectStop(g, { frame: true });
     }
+    rushWas = rush;
   }
 
   /* The park booking is the only fixed time tonight; the chip counts down to it, then gets out of the way. */
@@ -942,7 +1110,7 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
     follow = on;
     $("btn-me").classList.toggle("on", on);
     $("btn-me").setAttribute("aria-pressed", on ? "true" : "false");
-    if (on && map && lastPos) map.easeTo({ center: [lastPos.lng, lastPos.lat], zoom: Math.max(map.getZoom(), 16.5) });
+    if (on && map && lastPos) map.easeTo({ center: [lastPos.lng, lastPos.lat], zoom: Math.max(map.getZoom(), 16.5), padding: mapPad });
   }
   function startLocation() {
     if (!("geolocation" in navigator)) { toast("This browser can’t share your location."); return; }
@@ -956,7 +1124,7 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
     lastPos = { lat: p.coords.latitude, lng: p.coords.longitude, acc: p.coords.accuracy || 30 };
     store("hw2026-loc-on", "1");
     $("btn-locate").hidden = true;
-    $("setup-text").textContent = "Location is on. You’ll get a pop-up as you reach each stop.";
+    $("setup-text").textContent = "Location is on. The cards jump to each stop as you reach it.";
     if (map) {
       var ll = [lastPos.lng, lastPos.lat];
       if (!youMarker) {
@@ -967,7 +1135,10 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
       } else {
         youMarker.setLngLat(ll);
       }
-      if (follow) { if (first) map.jumpTo({ center: ll, zoom: 17 }); else map.easeTo({ center: ll, duration: 600 }); }
+      if (follow) {
+        if (first) map.jumpTo({ center: ll, zoom: 17, padding: mapPad });
+        else map.easeTo({ center: ll, duration: 600, padding: mapPad });
+      }
     }
     checkArrival();
     render();
@@ -977,7 +1148,7 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
     if (err && err.code === 1) {
       if (watchId !== null) navigator.geolocation.clearWatch(watchId);
       watchId = null; setFollow(false);
-      toast("Location is blocked. Allow it for this site in your phone’s settings, or use the Directions buttons.");
+      toast("Location is blocked. Allow it for this site in your phone’s settings, or use the Go buttons.");
     } else if (!lastPos) {
       toast("Still looking for your location. It works best outdoors.");
     }
@@ -990,30 +1161,14 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
       if (d <= s.r + Math.min(lastPos.acc, 40) && d < bestD) { best = s; bestD = d; }
     });
     here = best;
-    if (best && !seen[best.id] && !announced[best.id]) { announced[best.id] = true; showArrival(best); }
+    if (best && !seen[best.id] && !announced[best.id]) { announced[best.id] = true; arrived(best); }
   }
-
-  /* ---------- arrival sheet ---------- */
-  var arrStop = null;
-  function showArrival(s) {
-    arrStop = s;
-    $("arr-name").textContent = s.n + "  " + s.name;
-    $("arr-look").textContent = s.look;
-    $("arr-seen").setAttribute("aria-pressed", "false");
-    $("arr-seen").textContent = "Seen it";
-    $("arrive").hidden = false;
+  /* reaching a stop brings its card up, with what to look for */
+  function arrived(s) {
     if (navigator.vibrate) { try { navigator.vibrate([120, 60, 120]); } catch (e) {} }
+    toast("You’ve arrived: " + s.name);
+    selectStop(s, { state: sheetState === "peek" ? "half" : sheetState, camera: false });
   }
-  $("arr-seen").addEventListener("click", function () {
-    if (arrStop && !seen[arrStop.id]) toggleSeen(arrStop.id);
-    $("arrive").hidden = true;
-    var nx = target();
-    if (nx) {
-      var extra = lastPos ? " · " + fmtDist(dist(lastPos.lat, lastPos.lng, nx.lat, nx.lng)) : "";
-      toast("Next: " + nx.name + extra);
-    }
-  });
-  $("arr-close").addEventListener("click", function () { $("arrive").hidden = true; });
 
   /* ---------- keep screen on ---------- */
   var wakeLock = null, wantWake = false;
@@ -1279,7 +1434,7 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
     Music.stop(2.2);
     if (withLocation) startLocation();
     intro.classList.add("leaving");
-    setTimeout(function () { intro.hidden = true; intro.classList.remove("leaving", "ff"); if (map) map.resize(); }, 760);
+    setTimeout(function () { intro.hidden = true; intro.classList.remove("leaving", "ff"); if (map) map.resize(); applySheet(false); }, 760);
   }
   intro.addEventListener("click", function (ev) { if (!ev.target.closest("button") && $("intro-gate").hidden) intro.classList.add("ff"); });
   $("intro-begin").addEventListener("click", function () { closeIntro(true); });
@@ -1298,10 +1453,18 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
     }
   } catch (e) {}
 
+  var first = target();
+  activeIdx = first ? first.idx : 0;
   render();
+  function settle() { scrollToIdx(activeIdx, false); applySheet(false); }
+  requestAnimationFrame(function () {
+    settle();
+    if (map) { map.resize(); fitRoute(false); }
+  });
+  setTimeout(settle, 400);
   setInterval(render, 30000);
-  if (map) setTimeout(function () { map.resize(); }, 200);
-  window.addEventListener("resize", function () { if (map) map.resize(); });
+  window.addEventListener("resize", function () { settle(); if (map) map.resize(); });
+  if (wideMq.addEventListener) wideMq.addEventListener("change", settle);
 })();
 </script>
 </body>
