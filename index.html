@@ -280,6 +280,9 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
 .pick h3 { margin: 0; font-size: 17px; }
 .pick p { margin: 0; font-size: 14px; color: var(--mist); }
 .pick .btn { align-self: flex-start; }
+.picks { display: flex; flex-direction: column; gap: 10px; }
+.pick .pick-note { margin: 0; font-size: 13px; color: var(--candle); }
+.pick-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 2px; }
 .notes ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: var(--mist); }
 .small { font-size: 12px; color: var(--mist); margin: 0; }
 .linkbtn { background: none; border: 0; padding: 0; color: var(--mist); text-decoration: underline; cursor: pointer; font-size: 14px; align-self: flex-start; }
@@ -471,11 +474,35 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
 
           <section>
             <span class="sec-when plain">After tea</span>
-            <h2>A nightcap nearby</h2>
-            <div class="pick">
-              <h3>The Churchill Arms</h3>
-              <p>Autumn display outside, Thai food inside, on Kensington Church Street.</p>
-              <a class="btn" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&amp;destination=The%20Churchill%20Arms%2C%20119%20Kensington%20Church%20Street%2C%20London%20W8%207LN&amp;travelmode=walking">Directions</a>
+            <h2>Halloween nightcaps</h2>
+            <p class="sec-sub">All within a few minutes’ walk of Notting Hill Gate.</p>
+            <div class="picks">
+              <div class="pick">
+                <h3>The Champion</h3>
+                <p>A Halloween party with the pub dressed as a haunted wonderland, a live band called The Ghouls, a DJ until late and a costume contest with over £300 in prizes.</p>
+                <p class="pick-note">Tickets from £5.50 with a free spooky shot · 7pm to 2am · 1 Wellington Terrace, W2</p>
+                <div class="pick-actions">
+                  <a class="btn solid" target="_blank" rel="noopener" href="https://www.designmynight.com/london/pubs/notting-hill/the-champion/halloween-party">Tickets</a>
+                  <a class="btn" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&amp;destination=51.5100255,-0.1922685&amp;travelmode=walking">Directions</a>
+                </div>
+              </div>
+              <div class="pick">
+                <h3>Los Mochis Notting Hill</h3>
+                <p>A Day of the Dead weekend with themed decor, a DJ on Halloween night, a special cocktail list and a dark chocolate fondant with a spiced pumpkin centre.</p>
+                <p class="pick-note">Restaurant and bar, so worth booking · 2–4 Farmer Street, W8</p>
+                <div class="pick-actions">
+                  <a class="btn solid" target="_blank" rel="noopener" href="https://www.losmochis.co.uk/lc/events/losmochiscouk/lm/halloween-day-of-the-dead-london">Book</a>
+                  <a class="btn" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&amp;destination=51.5085267,-0.1971206&amp;travelmode=walking">Directions</a>
+                </div>
+              </div>
+              <div class="pick">
+                <h3>The Churchill Arms</h3>
+                <p>The easy walk-in option: a much-loved pub with its autumn display still up outside, crammed with bric-a-brac inside, and Thai food.</p>
+                <p class="pick-note">Walk-in pub · 119 Kensington Church Street, W8</p>
+                <div class="pick-actions">
+                  <a class="btn" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&amp;destination=The%20Churchill%20Arms%2C%20119%20Kensington%20Church%20Street%2C%20London%20W8%207LN&amp;travelmode=walking">Directions</a>
+                </div>
+              </div>
             </div>
           </section>
 
