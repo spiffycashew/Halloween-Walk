@@ -288,6 +288,137 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
   padding: 10px 14px; font-size: 14px; box-shadow: 0 6px 20px rgba(0,0,0,.45);
 }
 
+
+/* ---------- opening scene ---------- */
+.intro {
+  position: fixed; inset: 0; z-index: 2000; overflow-x: hidden; overflow-y: auto;
+  background: radial-gradient(120% 70% at 50% 110%, rgba(242,138,46,.28), transparent 60%), #0d0910;
+  color: var(--bone);
+  padding-top: max(28px, env(safe-area-inset-top, 0px));
+  padding-bottom: max(24px, env(safe-area-inset-bottom, 0px));
+  padding-left: max(24px, env(safe-area-inset-left, 0px));
+  padding-right: max(24px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column;
+}
+.intro::before {
+  content: ""; position: absolute; left: 50%; bottom: -28%; width: 150%; height: 72%; transform: translateX(-50%);
+  background: radial-gradient(closest-side, rgba(255,186,90,.24), transparent 72%);
+  animation: flicker 3.4s linear infinite; pointer-events: none;
+}
+@keyframes flicker {
+  0% { opacity: .82; } 6% { opacity: 1; } 11% { opacity: .7; } 17% { opacity: .95; } 29% { opacity: .78; }
+  41% { opacity: 1; } 52% { opacity: .74; } 63% { opacity: .92; } 78% { opacity: .8; } 90% { opacity: .97; } 100% { opacity: .82; }
+}
+.fog {
+  position: absolute; left: -30%; width: 160%; height: 42%; pointer-events: none;
+  background: radial-gradient(40% 50% at 30% 50%, rgba(171,159,182,.17), transparent 70%),
+              radial-gradient(35% 45% at 75% 60%, rgba(171,159,182,.12), transparent 70%);
+  filter: blur(10px); animation: drift 26s ease-in-out infinite alternate;
+}
+.fog.f1 { bottom: 4%; opacity: .7; }
+.fog.f2 { bottom: 34%; opacity: .45; animation-duration: 36s; animation-direction: alternate-reverse; }
+@keyframes drift { from { transform: translateX(-9%); } to { transform: translateX(9%); } }
+.moon {
+  position: absolute; top: max(34px, calc(env(safe-area-inset-top, 0px) + 18px)); right: max(28px, env(safe-area-inset-right, 0px));
+  width: 66px; height: 66px; border-radius: 50%;
+  background: radial-gradient(circle at 38% 35%, #fff8e8, #f1e0bb 55%, #d6c397 100%);
+  box-shadow: 0 0 40px 10px rgba(255,236,190,.16), 0 0 120px 34px rgba(255,236,190,.07);
+}
+.bat { position: absolute; width: 38px; height: 26px; color: #3b2c47; pointer-events: none; }
+.intro .bat { top: 12%; left: -14%; animation: fly 8s ease-in-out 1s both; }
+@keyframes fly {
+  0% { transform: translate(0, 0) scale(.7); } 30% { transform: translate(40vw, -4vh) scale(1); }
+  60% { transform: translate(78vw, 3vh) scale(.85); } 100% { transform: translate(130vw, -6vh) scale(.6); }
+}
+.intro-inner { position: relative; z-index: 1; margin: auto 0 0; width: 100%; max-width: 520px; display: flex; flex-direction: column; gap: 18px; }
+.i-eyebrow { font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--candle); font-weight: 700; }
+.i-title {
+  margin: 0; font-family: var(--font-display); font-weight: 400; font-size: clamp(58px, 18vw, 100px); line-height: .86;
+  color: var(--pumpkin); text-shadow: 0 0 30px rgba(242,138,46,.45); text-wrap: balance;
+}
+.i-lines { margin: 0; display: flex; flex-direction: column; gap: 2px; font-size: 19px; line-height: 1.35; }
+.acts {
+  list-style: none; margin: 2px 0 0; padding: 16px 0 0; display: flex; flex-direction: column; gap: 12px;
+  border-top: 1px solid rgba(240,230,212,.14);
+}
+.acts li { display: grid; grid-template-columns: 36px 1fr; gap: 8px; align-items: baseline; }
+.acts .rn { font-family: var(--font-display); font-size: 24px; line-height: 1; color: var(--candle); }
+.acts b { display: block; font-size: 16px; }
+.acts .d { display: block; font-size: 14px; color: var(--mist); }
+.i-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+.i-begin {
+  min-height: 56px; border-radius: 14px; border: 0; cursor: pointer;
+  background: var(--pumpkin); color: var(--pumpkin-ink); font: 700 18px/1 var(--font-body);
+  box-shadow: 0 8px 30px rgba(242,138,46,.35);
+}
+.i-note { margin: 0; font-size: 13px; color: var(--mist); }
+.i-skip { align-self: flex-start; background: none; border: 0; padding: 4px 0; cursor: pointer; color: var(--mist); font: 15px var(--font-body); text-decoration: underline; }
+.intro .rv { opacity: 0; animation: rv .9s ease forwards; animation-delay: var(--d, 0s); }
+@keyframes rv { from { opacity: 0; transform: translateY(12px); filter: blur(5px); } to { opacity: 1; transform: none; filter: none; } }
+.intro.ff .rv { animation-delay: 0s !important; animation-duration: .25s; }
+.intro.leaving { animation: leave .8s ease forwards; pointer-events: none; }
+@keyframes leave { to { opacity: 0; transform: scale(1.05); filter: blur(6px); } }
+
+/* ---------- bingo ---------- */
+.bingo-btn { position: relative; }
+.bingo-count {
+  position: absolute; top: -5px; right: -5px; min-width: 19px; height: 19px; border-radius: 10px; padding: 0 5px;
+  background: var(--pumpkin); color: var(--pumpkin-ink); font-size: 11px; font-weight: 700;
+  display: grid; place-items: center; font-variant-numeric: tabular-nums;
+}
+.bingo-entry {
+  display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: center;
+  padding: 14px; border-radius: 14px; border: 1px solid var(--line);
+  background: radial-gradient(90% 120% at 100% 0%, rgba(242,138,46,.14), transparent 60%), var(--card);
+}
+.bingo-entry h3 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 26px; line-height: 1; color: var(--pumpkin); }
+.bingo-entry p { margin: 0; font-size: 14px; color: var(--mist); grid-column: 1; }
+.bingo-entry .btn { grid-column: 2; grid-row: 1 / span 2; }
+.bingo {
+  position: fixed; inset: 0; z-index: 1500; background: var(--night); overflow-y: auto;
+  padding-top: max(14px, env(safe-area-inset-top, 0px));
+  padding-bottom: max(20px, env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  animation: rise .25s ease-out;
+}
+.bingo-inner { width: 100%; max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+.bingo-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.bingo-top h2 { font-size: 38px; color: var(--pumpkin); text-shadow: 0 0 18px rgba(242,138,46,.3); }
+.bingo .sub { margin: 0; font-size: 15px; color: var(--mist); }
+.grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; }
+.sq {
+  aspect-ratio: 1; max-width: 100%; min-width: 0; border-radius: 12px; border: 1.5px solid var(--line);
+  background: var(--card); color: var(--bone); font: 700 13px/1.2 var(--font-body); padding: 6px;
+  display: grid; place-items: center; text-align: center; cursor: pointer; overflow-wrap: break-word; hyphens: auto;
+  transition: background .15s ease, border-color .15s ease;
+}
+.sq[aria-pressed="true"] { background: var(--pumpkin); border-color: var(--pumpkin); color: var(--pumpkin-ink); }
+.sq.stamp { animation: stamp .32s ease-out; }
+.sq.win { box-shadow: 0 0 0 3px var(--candle); }
+@keyframes stamp { 0% { transform: scale(.84); } 60% { transform: scale(1.06); } 100% { transform: none; } }
+.bingo-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 14px; color: var(--mist); font-variant-numeric: tabular-nums; }
+.confirm-row {
+  display: flex; gap: 8px; flex-wrap: wrap; align-items: center; font-size: 14px;
+  padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--card);
+}
+.confirm-row span { flex: 1 1 100%; }
+.cheer {
+  position: fixed; inset: 0; z-index: 1600; display: grid; place-items: center; text-align: center; overflow: hidden;
+  background: radial-gradient(70% 50% at 50% 50%, rgba(242,138,46,.22), transparent 70%), rgba(13,9,16,.9);
+  padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px));
+}
+.cheer .big {
+  font-family: var(--font-display); font-size: clamp(76px, 26vw, 130px); line-height: .9; color: var(--pumpkin);
+  text-shadow: 0 0 40px rgba(242,138,46,.6); animation: pop .55s cubic-bezier(.2,1.6,.4,1);
+}
+@keyframes pop { from { transform: scale(.4); opacity: 0; } to { transform: none; opacity: 1; } }
+.cheer p { margin: 10px 0 20px; font-size: 18px; }
+.cheer .bat { color: #f0e6d4; opacity: .8; }
+.cheer .bat.b1 { top: 18%; left: -12%; animation: fly 3.2s ease-in-out both; }
+.cheer .bat.b2 { top: 70%; left: -12%; width: 28px; animation: fly 3.8s ease-in-out .3s both; }
+.cheer .bat.b3 { top: 32%; left: -12%; width: 22px; animation: fly 4.4s ease-in-out .6s both; }
+
 @media (min-width: 900px) {
   .app { display: grid; grid-template-columns: 1fr 440px; grid-template-rows: auto auto 1fr; }
   .top { grid-column: 1 / -1; }
@@ -299,6 +430,10 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }
 }
+@media (prefers-reduced-motion: reduce) {
+  .intro .rv { opacity: 1 !important; }
+  .bat { display: none; }
+}
 </style>
 </head>
 <body>
@@ -306,8 +441,9 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
   <header class="top">
     <h1>Halloween Walk</h1>
     <span class="chip" id="chip">Park 7pm</span>
-    <button type="button" class="icon-btn" id="btn-share" aria-label="Share this map with your group">
-      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 3v12M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>
+    <button type="button" class="icon-btn bingo-btn" id="btn-bingo" aria-label="Open Halloween bingo">
+      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M4 4h16v16H4zM4 9.33h16M4 14.67h16M9.33 4v16M14.67 4v16"/></svg>
+      <span class="bingo-count" id="bingo-count" hidden>0</span>
     </button>
     <div class="progress" role="progressbar" aria-label="Stops seen" aria-valuemin="0" aria-valuemax="16" aria-valuenow="0" id="progress"><span id="progress-bar"></span></div>
   </header>
@@ -348,12 +484,19 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
         <div class="row">
           <button type="button" class="btn blue" id="btn-locate">Show my location</button>
           <button type="button" class="btn blue" id="btn-wake" aria-pressed="false" hidden>Keep screen on</button>
+          <button type="button" class="btn" id="btn-share">Share with the group</button>
         </div>
       </div>
 
       <div class="alert">
         <span class="t">6:55pm</span>
         <p>Be at the Holland Park gates on Kensington High Street. 7pm is the last entry slot. Don’t arrive more than 5 minutes early.</p>
+      </div>
+
+      <div class="bingo-entry">
+        <h3>Halloween Bingo</h3>
+        <p>Spot skeletons, witches and more as you walk. Everyone gets a different card.</p>
+        <button type="button" class="btn solid" id="open-bingo">Open card</button>
       </div>
 
       <section id="sec-leg1">
@@ -407,6 +550,7 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
           <li>Displays can change on the night, so keep an eye out on the streets in between.</li>
         </ul>
         <button type="button" class="linkbtn" id="reset">Clear all ticks</button>
+        <button type="button" class="linkbtn" id="replay-intro">Replay the intro</button>
         <p class="small">Displays from Claire &amp; The City’s 2026 guide, Londonist’s 22 October walk and Instagram walk posts. Park details from Kensington’s Halloween FAQ. Map © OpenFreeMap, © OpenMapTiles, © OpenStreetMap contributors. Walking routes from FOSSGIS / OSRM.</p>
       </section>
     </div>
@@ -423,6 +567,63 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
   </div>
 </div>
 <div class="toast" id="toast" hidden role="status"></div>
+<div class="intro" id="intro" hidden role="dialog" aria-modal="true" aria-labelledby="intro-title">
+  <div class="fog f2" aria-hidden="true"></div>
+  <div class="fog f1" aria-hidden="true"></div>
+  <div class="moon" aria-hidden="true"></div>
+  <svg class="bat" viewBox="0 0 24 16" aria-hidden="true"><path fill="currentColor" d="M12 5.2c-.9 0-1.6.8-1.6.8S9 3.9 6.4 3.9C4.7 3.9 3 4.8 2 6.2c1.6 0 2.8.7 3.2 2.1-1.1-.2-2.2.1-2.9 1 1.5.1 2.6.9 3 2.3 1.4-1.4 3.4-2.1 5.1-1.1.6.4 1.1 1 1.6 1.9.5-.9 1-1.5 1.6-1.9 1.7-1 3.7-.3 5.1 1.1.4-1.4 1.5-2.2 3-2.3-.7-.9-1.8-1.2-2.9-1 .4-1.4 1.6-2.1 3.2-2.1-1-1.4-2.7-2.3-4.4-2.3-2.6 0-4 2.1-4 2.1s-.7-.8-1.6-.8z"/></svg>
+  <div class="intro-inner">
+    <span class="i-eyebrow rv" style="--d:.2s">Saturday 31 October · Kensington to Notting Hill</span>
+    <h2 class="i-title rv" id="intro-title" style="--d:.6s">Halloween Night Walk</h2>
+    <p class="i-lines">
+      <span class="rv" style="--d:1.5s">Eleven haunted streets.</span>
+      <span class="rv" style="--d:2.1s">One peculiar park.</span>
+      <span class="rv" style="--d:2.7s">A Day of the Dead feast to finish.</span>
+    </p>
+    <ol class="acts rv" style="--d:3.4s">
+      <li><span class="rn">I</span><div><b>Kensington’s haunted houses</b><span class="d">Witches, reapers and a pumpkin arch as night falls</span></div></li>
+      <li><span class="rn">II</span><div><b>The Playful Park of Peculiar</b><span class="d">Your 7pm slot in Holland Park</span></div></li>
+      <li><span class="rn">III</span><div><b>Notting Hill’s crescents</b><span class="d">Pastel houses gone ghoulish, then dinner</span></div></li>
+    </ol>
+    <div class="i-actions rv" style="--d:4.2s">
+      <button type="button" class="i-begin" id="intro-begin">Begin the walk</button>
+      <p class="i-note">This turns on your location. It stays on your phone.</p>
+      <button type="button" class="i-skip" id="intro-skip">Just look around for now</button>
+    </div>
+  </div>
+</div>
+
+<div class="bingo" id="bingo" hidden role="dialog" aria-modal="true" aria-labelledby="bingo-title">
+  <div class="bingo-inner">
+    <div class="bingo-top">
+      <h2 id="bingo-title">Halloween Bingo</h2>
+      <button type="button" class="btn" id="bingo-close" style="white-space:nowrap">Back to map</button>
+    </div>
+    <p class="sub">Everyone’s card is shuffled differently. Tap a square when you spot it. First to a full line shouts “Bingo!”</p>
+    <div class="grid" id="bingo-grid"></div>
+    <div class="bingo-foot">
+      <span id="bingo-status">0 of 16 spotted</span>
+      <button type="button" class="linkbtn" id="bingo-new">Shuffle a new card</button>
+    </div>
+    <div class="confirm-row" id="bingo-confirm" hidden>
+      <span>This clears your marks and shuffles the squares.</span>
+      <button type="button" class="btn solid" id="bingo-yes">Shuffle</button>
+      <button type="button" class="btn" id="bingo-no">Keep this card</button>
+    </div>
+  </div>
+</div>
+
+<div class="cheer" id="cheer" hidden role="alertdialog" aria-labelledby="cheer-big" aria-describedby="cheer-text">
+  <svg class="bat b1" viewBox="0 0 24 16" aria-hidden="true"><path fill="currentColor" d="M12 5.2c-.9 0-1.6.8-1.6.8S9 3.9 6.4 3.9C4.7 3.9 3 4.8 2 6.2c1.6 0 2.8.7 3.2 2.1-1.1-.2-2.2.1-2.9 1 1.5.1 2.6.9 3 2.3 1.4-1.4 3.4-2.1 5.1-1.1.6.4 1.1 1 1.6 1.9.5-.9 1-1.5 1.6-1.9 1.7-1 3.7-.3 5.1 1.1.4-1.4 1.5-2.2 3-2.3-.7-.9-1.8-1.2-2.9-1 .4-1.4 1.6-2.1 3.2-2.1-1-1.4-2.7-2.3-4.4-2.3-2.6 0-4 2.1-4 2.1s-.7-.8-1.6-.8z"/></svg>
+  <svg class="bat b2" viewBox="0 0 24 16" aria-hidden="true"><path fill="currentColor" d="M12 5.2c-.9 0-1.6.8-1.6.8S9 3.9 6.4 3.9C4.7 3.9 3 4.8 2 6.2c1.6 0 2.8.7 3.2 2.1-1.1-.2-2.2.1-2.9 1 1.5.1 2.6.9 3 2.3 1.4-1.4 3.4-2.1 5.1-1.1.6.4 1.1 1 1.6 1.9.5-.9 1-1.5 1.6-1.9 1.7-1 3.7-.3 5.1 1.1.4-1.4 1.5-2.2 3-2.3-.7-.9-1.8-1.2-2.9-1 .4-1.4 1.6-2.1 3.2-2.1-1-1.4-2.7-2.3-4.4-2.3-2.6 0-4 2.1-4 2.1s-.7-.8-1.6-.8z"/></svg>
+  <svg class="bat b3" viewBox="0 0 24 16" aria-hidden="true"><path fill="currentColor" d="M12 5.2c-.9 0-1.6.8-1.6.8S9 3.9 6.4 3.9C4.7 3.9 3 4.8 2 6.2c1.6 0 2.8.7 3.2 2.1-1.1-.2-2.2.1-2.9 1 1.5.1 2.6.9 3 2.3 1.4-1.4 3.4-2.1 5.1-1.1.6.4 1.1 1 1.6 1.9.5-.9 1-1.5 1.6-1.9 1.7-1 3.7-.3 5.1 1.1.4-1.4 1.5-2.2 3-2.3-.7-.9-1.8-1.2-2.9-1 .4-1.4 1.6-2.1 3.2-2.1-1-1.4-2.7-2.3-4.4-2.3-2.6 0-4 2.1-4 2.1s-.7-.8-1.6-.8z"/></svg>
+  <div>
+    <div class="big" id="cheer-big">Bingo!</div>
+    <p id="cheer-text">Shout it to the group.</p>
+    <button type="button" class="btn solid" id="cheer-ok">Keep playing</button>
+  </div>
+</div>
+
 
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script>
@@ -932,6 +1133,122 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
         function () { toast(data.url); });
     } else toast(data.url);
   });
+
+
+  /* ---------- opening scene ---------- */
+  var intro = $("intro");
+  function openIntro() {
+    intro.classList.remove("leaving", "ff");
+    intro.hidden = false;
+    intro.scrollTop = 0;
+    Array.prototype.forEach.call(intro.querySelectorAll(".rv, .bat"), function (el) {
+      el.style.animation = "none"; void el.offsetWidth; el.style.animation = "";
+    });
+  }
+  function closeIntro(withLocation) {
+    store("hw2026-intro-seen", "1");
+    if (withLocation) startLocation();
+    intro.classList.add("leaving");
+    setTimeout(function () { intro.hidden = true; intro.classList.remove("leaving", "ff"); if (map) map.resize(); }, 760);
+  }
+  intro.addEventListener("click", function (ev) { if (!ev.target.closest("button")) intro.classList.add("ff"); });
+  $("intro-begin").addEventListener("click", function () { closeIntro(true); });
+  $("intro-skip").addEventListener("click", function () { closeIntro(false); });
+  $("replay-intro").addEventListener("click", openIntro);
+  if (store("hw2026-intro-seen") !== "1") openIntro();
+
+  /* ---------- bingo ---------- */
+  var BINGO_ITEMS = [
+    "Climbing skeleton", "Giant spider", "Witch on a broom", "Grim reaper",
+    "Pumpkin arch", "Black cat", "Skeleton dog", "Sugar skull",
+    "‘Keep out’ sign", "Gravestone", "Mummy", "Ghost in a tree",
+    "Lit jack-o’-lantern", "Coffin", "Dog in costume", "Cauldron"
+  ];
+  var LINES = [];
+  (function () {
+    for (var r = 0; r < 4; r++) LINES.push([r * 4, r * 4 + 1, r * 4 + 2, r * 4 + 3]);
+    for (var c = 0; c < 4; c++) LINES.push([c, c + 4, c + 8, c + 12]);
+    LINES.push([0, 5, 10, 15], [3, 6, 9, 12]);
+  })();
+  function shuffled() {
+    var a = BINGO_ITEMS.map(function (_, i) { return i; });
+    for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
+    return a;
+  }
+  var order = null, marks = {};
+  try {
+    order = JSON.parse(store("hw2026-bingo-order") || "null");
+    marks = JSON.parse(store("hw2026-bingo-marks") || "{}") || {};
+  } catch (e) { order = null; marks = {}; }
+  if (!order || order.length !== BINGO_ITEMS.length) { order = shuffled(); marks = {}; }
+  function saveBingo() { store("hw2026-bingo-order", JSON.stringify(order)); store("hw2026-bingo-marks", JSON.stringify(marks)); }
+  saveBingo();
+  function winning() { return LINES.filter(function (l) { return l.every(function (p) { return marks[p]; }); }); }
+  function countMarks() { return Object.keys(marks).length; }
+
+  var squares = [];
+  function buildGrid() {
+    var grid = $("bingo-grid");
+    grid.innerHTML = ""; squares = [];
+    order.forEach(function (itemIdx, pos) {
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "sq"; b.id = "sq-" + pos;
+      b.textContent = BINGO_ITEMS[itemIdx];
+      b.addEventListener("click", function () { toggleMark(pos); });
+      b.addEventListener("animationend", function () { b.classList.remove("stamp"); });
+      grid.appendChild(b); squares.push(b);
+    });
+    renderBingo();
+  }
+  function renderBingo() {
+    var wins = winning(), winCells = {};
+    wins.forEach(function (l) { l.forEach(function (p) { winCells[p] = 1; }); });
+    squares.forEach(function (b, pos) {
+      b.setAttribute("aria-pressed", marks[pos] ? "true" : "false");
+      b.classList.toggle("win", !!winCells[pos]);
+    });
+    var n = countMarks();
+    $("bingo-status").textContent = n + " of 16 spotted" + (wins.length ? " · " + wins.length + (wins.length === 1 ? " line" : " lines") : "");
+    var cnt = $("bingo-count");
+    cnt.hidden = n === 0; cnt.textContent = String(n);
+  }
+  function toggleMark(pos) {
+    var before = winning().length;
+    if (marks[pos]) delete marks[pos]; else { marks[pos] = 1; squares[pos].classList.add("stamp"); }
+    saveBingo(); renderBingo();
+    var after = winning().length;
+    if (countMarks() === 16) cheer("Full house!", "You’ve spotted every single one.");
+    else if (before === 0 && after > 0) cheer("Bingo!", "Shout it to the group.");
+  }
+  function cheer(big, text) {
+    $("cheer-big").textContent = big;
+    $("cheer-text").textContent = text;
+    var c = $("cheer");
+    c.hidden = false;
+    Array.prototype.forEach.call(c.querySelectorAll(".bat, .big"), function (el) {
+      el.style.animation = "none"; void el.offsetWidth; el.style.animation = "";
+    });
+    if (navigator.vibrate) { try { navigator.vibrate([80, 40, 80, 40, 160]); } catch (e) {} }
+    $("cheer-ok").focus();
+  }
+  $("cheer-ok").addEventListener("click", function () { $("cheer").hidden = true; });
+  function openBingo() { $("bingo").hidden = false; $("bingo").scrollTop = 0; }
+  function closeBingo() { $("bingo").hidden = true; $("bingo-confirm").hidden = true; }
+  $("btn-bingo").addEventListener("click", openBingo);
+  $("open-bingo").addEventListener("click", openBingo);
+  $("bingo-close").addEventListener("click", closeBingo);
+  $("bingo-new").addEventListener("click", function () { $("bingo-confirm").hidden = false; });
+  $("bingo-no").addEventListener("click", function () { $("bingo-confirm").hidden = true; });
+  $("bingo-yes").addEventListener("click", function () {
+    order = shuffled(); marks = {}; saveBingo(); buildGrid();
+    $("bingo-confirm").hidden = true; toast("New card shuffled.");
+  });
+  document.addEventListener("keydown", function (ev) {
+    if (ev.key !== "Escape") return;
+    if (!$("cheer").hidden) $("cheer").hidden = true;
+    else if (!$("bingo").hidden) closeBingo();
+  });
+  buildGrid();
 
   /* ---------- wiring ---------- */
   $("btn-locate").addEventListener("click", startLocation);
