@@ -330,6 +330,15 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
   0% { transform: translate(0, 0) scale(.7); } 30% { transform: translate(40vw, -4vh) scale(1); }
   60% { transform: translate(78vw, 3vh) scale(.85); } 100% { transform: translate(130vw, -6vh) scale(.6); }
 }
+.i-gate { position: relative; z-index: 1; margin: auto 0 0; width: 100%; max-width: 520px; display: flex; flex-direction: column; gap: 16px; animation: rv 1.1s ease .3s both; }
+.i-gate-line { margin: 0 0 6px; font-family: var(--font-display); font-size: clamp(50px, 15vw, 84px); line-height: .9; color: var(--bone); text-shadow: 0 0 24px rgba(255,212,126,.18); }
+.i-gate.leaving { animation: leave .6s ease forwards; }
+.i-sound {
+  position: absolute; z-index: 3; top: max(20px, env(safe-area-inset-top, 0px)); left: max(20px, env(safe-area-inset-left, 0px));
+  width: 44px; height: 44px; border-radius: 50%; padding: 0; cursor: pointer; display: grid; place-items: center;
+  border: 1px solid rgba(240,230,212,.25); background: rgba(13,9,16,.55); color: var(--bone);
+}
+.i-sound[aria-pressed="true"] { color: var(--mist); }
 .intro-inner { position: relative; z-index: 1; margin: auto 0 0; width: 100%; max-width: 520px; display: flex; flex-direction: column; gap: 18px; }
 .i-eyebrow { font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--candle); font-weight: 700; }
 .i-title {
@@ -523,13 +532,13 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
       <section id="sec-leg2">
         <span class="sec-when leg2">Route 2 · After the park</span>
         <h2>Notting Hill’s crescents</h2>
-        <p class="sec-sub">From the park exit to dinner. About 3.3 km, so 40-odd minutes of walking at an easy pace.</p>
+        <p class="sec-sub">From the park exit to Notting Hill Gate for tea. About 3 km, so 40-odd minutes at an easy pace.</p>
         <a class="route-btn" id="route2" target="_blank" rel="noopener" href="#">Open Route 2 in Google Maps</a>
         <ol class="stops" id="stops-leg2"></ol>
       </section>
 
       <section>
-        <span class="sec-when plain">After dinner</span>
+        <span class="sec-when plain">After tea</span>
         <h2>A nightcap nearby</h2>
         <div class="picks">
           <div class="pick">
@@ -572,18 +581,27 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
   <div class="fog f1" aria-hidden="true"></div>
   <div class="moon" aria-hidden="true"></div>
   <svg class="bat" viewBox="0 0 24 16" aria-hidden="true"><path fill="currentColor" d="M12 5.2c-.9 0-1.6.8-1.6.8S9 3.9 6.4 3.9C4.7 3.9 3 4.8 2 6.2c1.6 0 2.8.7 3.2 2.1-1.1-.2-2.2.1-2.9 1 1.5.1 2.6.9 3 2.3 1.4-1.4 3.4-2.1 5.1-1.1.6.4 1.1 1 1.6 1.9.5-.9 1-1.5 1.6-1.9 1.7-1 3.7-.3 5.1 1.1.4-1.4 1.5-2.2 3-2.3-.7-.9-1.8-1.2-2.9-1 .4-1.4 1.6-2.1 3.2-2.1-1-1.4-2.7-2.3-4.4-2.3-2.6 0-4 2.1-4 2.1s-.7-.8-1.6-.8z"/></svg>
-  <div class="intro-inner">
+  <button type="button" class="i-sound" id="intro-sound" hidden aria-pressed="false" aria-label="Mute the music">
+    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" id="intro-sound-icon"><path fill="currentColor" d="M4 9h4l5-4v14l-5-4H4z"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M16 8.5a5 5 0 0 1 0 7M18.8 6a8.5 8.5 0 0 1 0 12"/></svg>
+  </button>
+  <div class="i-gate" id="intro-gate">
+    <span class="i-eyebrow">Halloween Night Walk · 31 October</span>
+    <p class="i-gate-line">Turn your sound up.</p>
+    <button type="button" class="i-begin" id="enter-sound">Enter</button>
+    <button type="button" class="i-skip" id="enter-quiet">Enter without sound</button>
+  </div>
+  <div class="intro-inner" id="intro-inner" hidden>
     <span class="i-eyebrow rv" style="--d:.2s">Saturday 31 October · Kensington to Notting Hill</span>
     <h2 class="i-title rv" id="intro-title" style="--d:.6s">Halloween Night Walk</h2>
     <p class="i-lines">
       <span class="rv" style="--d:1.5s">Eleven haunted streets.</span>
       <span class="rv" style="--d:2.1s">One peculiar park.</span>
-      <span class="rv" style="--d:2.7s">A Day of the Dead feast to finish.</span>
+      <span class="rv" style="--d:2.7s">And tea somewhere in Notting Hill to finish.</span>
     </p>
     <ol class="acts rv" style="--d:3.4s">
       <li><span class="rn">I</span><div><b>Kensington’s haunted houses</b><span class="d">Witches, reapers and a pumpkin arch as night falls</span></div></li>
       <li><span class="rn">II</span><div><b>The Playful Park of Peculiar</b><span class="d">Your 7pm slot in Holland Park</span></div></li>
-      <li><span class="rn">III</span><div><b>Notting Hill’s crescents</b><span class="d">Pastel houses gone ghoulish, then dinner</span></div></li>
+      <li><span class="rn">III</span><div><b>Notting Hill’s crescents</b><span class="d">Pastel houses gone ghoulish, then tea</span></div></li>
     </ol>
     <div class="i-actions rv" style="--d:4.2s">
       <button type="button" class="i-begin" id="intro-begin">Begin the walk</button>
@@ -631,7 +649,7 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
   "use strict";
 
   var ROUTE1_URL = "https://www.google.com/maps/dir/?api=1&origin=High%20Street%20Kensington%20Station,%20London%20W8&destination=51.49913,-0.1987634&travelmode=walking&waypoints=Kensington%20Square,%20London%20W8%7CVictoria%20Road,%20London%20W8%7CArgyll%20Road,%20London%20W8%7CPhillimore%20Place,%20London%20W8%7CUpper%20Phillimore%20Gardens,%20London%20W8%7CPhillimore%20Gardens,%20London%20W8%7CIlchester%20Place,%20London%20W14";
-  var ROUTE2_URL = "https://www.google.com/maps/dir/?api=1&origin=51.5069295,-0.2033785&destination=Los%20Mochis,%202-4%20Farmer%20Street,%20London%20W8%207SN&travelmode=walking&waypoints=Holland%20Park%20Mews,%20London%20W11%7CClarendon%20Road,%20London%20W11%7CLansdowne%20Crescent,%20London%20W11%7CElgin%20Crescent,%20London%20W11%7CDuke%20of%20Wellington,%20179%20Portobello%20Road,%20London%20W11%202ED%7CAlice%27s,%2086%20Portobello%20Road,%20London%20W11%202QD%7CPembridge%20Road,%20London%20W11";
+  var ROUTE2_URL = "https://www.google.com/maps/dir/?api=1&origin=51.5069295,-0.2033785&destination=Notting%20Hill%20Gate%20Station,%20London%20W11&travelmode=walking&waypoints=Holland%20Park%20Mews,%20London%20W11%7CClarendon%20Road,%20London%20W11%7CLansdowne%20Crescent,%20London%20W11%7CElgin%20Crescent,%20London%20W11%7CDuke%20of%20Wellington,%20179%20Portobello%20Road,%20London%20W11%202ED%7CAlice%27s,%2086%20Portobello%20Road,%20London%20W11%202QD%7CPembridge%20Road,%20London%20W11";
 
   var START = { id: "start", n: "S", leg: 1, name: "High Street Kensington tube", lat: 51.5008834, lng: -0.1926463 };
 
@@ -681,10 +699,9 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
     { id: "alices", n: 15, leg: 2, time: "8:40", name: "Portobello Road to Notting Hill Gate", lat: 51.5127724, lng: -0.2019176, r: 60,
       look: "Halloween shop windows along the way.",
       where: "You pass Alice’s, the red antiques shop at no. 86. Keep going, then follow Pembridge Road down to Notting Hill Gate." },
-    { id: "dinner", n: 16, leg: 2, time: "8:55", name: "Los Mochis, Farmer Street", lat: 51.5085267, lng: -0.1971206, r: 45,
-      look: "Day of the Dead decorations and a DJ tonight. Book ahead.",
-      where: "You’re on Farmer Street, just south of Notting Hill Gate tube.",
-      book: "https://www.losmochis.co.uk/nh/notting-hill" }
+    { id: "dinner", n: 16, leg: 2, time: "8:55", name: "Tea in Notting Hill", lat: 51.5091207, lng: -0.1963494, r: 70,
+      look: "Pick somewhere on the night. Notting Hill Gate, Pembridge Road and the bottom of Portobello Road are full of places to eat.",
+      where: "You’ve reached Notting Hill Gate tube, the end of the walk." }
   ];
   var BY_ID = {};
   STOPS.forEach(function (s, i) { s.idx = i; BY_ID[s.id] = s; });
@@ -881,7 +898,7 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
     Object.keys(LEGS).forEach(function (key) {
       var leg = LEGS[key];
       if (leg.straight) return;
-      var cacheKey = "hw2026-route3-" + key, cached = null;
+      var cacheKey = "hw2026-route4-" + key, cached = null;
       try { cached = JSON.parse(store(cacheKey) || "null"); } catch (e) { cached = null; }
       if (cached && cached.length > 2) { updateRoute(key, cached); return; }
       var coords = leg.pts.map(function (p) { return p.lng.toFixed(6) + "," + p.lat.toFixed(6); }).join(";");
@@ -1135,23 +1152,210 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
   });
 
 
+  /* ---------- soundtrack: an original spooky theme synthesised in the browser ---------- */
+  var Music = (function () {
+    var ctx = null, master = null, dry = null, verb = null;
+    var playing = false, muted = false, timers = [], sources = [];
+    var BPM = 92, BEAT = 60 / BPM, CYCLE = 40 * BEAT;
+    var LEVEL = 0.85;
+
+    function hz(m) { return 440 * Math.pow(2, (m - 69) / 12); }
+    function keep(node) { sources.push(node); return node; }
+    function impulse(seconds, decay) {
+      var rate = ctx.sampleRate, len = Math.floor(rate * seconds), buf = ctx.createBuffer(2, len, rate);
+      for (var c = 0; c < 2; c++) {
+        var d = buf.getChannelData(c);
+        for (var i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, decay);
+      }
+      return buf;
+    }
+    function out(node, wetAmt) {
+      node.connect(dry);
+      if (wetAmt) { var g = ctx.createGain(); g.gain.value = wetAmt; node.connect(g); g.connect(verb); }
+    }
+    function lfo(freq, depth, target) {
+      var o = keep(ctx.createOscillator()), g = ctx.createGain();
+      o.frequency.value = freq; g.gain.value = depth;
+      o.connect(g); g.connect(target); o.start();
+    }
+
+    /* low, slowly breathing drone on D and A */
+    function drone() {
+      var f = ctx.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = 360; f.Q.value = 6;
+      var g = ctx.createGain(); g.gain.value = 0.11;
+      [hz(38), hz(38) * 1.004, hz(45) * 0.998].forEach(function (fr) {
+        var o = keep(ctx.createOscillator()); o.type = "sawtooth"; o.frequency.value = fr; o.connect(f); o.start();
+      });
+      lfo(0.07, 220, f.frequency);
+      f.connect(g); out(g, 0.6);
+    }
+    /* wind: filtered noise that swells and fades */
+    function wind() {
+      var len = ctx.sampleRate * 3, buf = ctx.createBuffer(1, len, ctx.sampleRate), d = buf.getChannelData(0);
+      for (var i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+      var n = keep(ctx.createBufferSource()); n.buffer = buf; n.loop = true;
+      var bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = 700; bp.Q.value = 0.9;
+      var g = ctx.createGain(); g.gain.value = 0.035;
+      lfo(0.045, 450, bp.frequency);
+      lfo(0.11, 0.025, g.gain);
+      n.connect(bp); bp.connect(g); out(g, 0.8); n.start();
+    }
+    /* a slow heartbeat */
+    function beat(t, strength) {
+      var o = ctx.createOscillator(), g = ctx.createGain();
+      o.frequency.setValueAtTime(70, t); o.frequency.exponentialRampToValueAtTime(38, t + 0.16);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.55 * strength, t + 0.012);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.28);
+      o.connect(g); out(g, 0.15); o.start(t); o.stop(t + 0.32);
+    }
+    /* theremin-style lead: one gliding voice with vibrato */
+    function lead(t, phrase) {
+      var o = ctx.createOscillator(), o2 = ctx.createOscillator(), g = ctx.createGain(), mix = ctx.createGain();
+      o.type = "sine"; o2.type = "triangle"; mix.gain.value = 0.25;
+      var vib = ctx.createOscillator(), vg = ctx.createGain();
+      vib.frequency.value = 5.3; vg.gain.value = 6; vib.connect(vg); vg.connect(o.frequency); vg.connect(o2.frequency);
+      var at = t;
+      o.frequency.setValueAtTime(hz(phrase[0][0]), t); o2.frequency.setValueAtTime(hz(phrase[0][0]), t);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.16, t + 0.35);
+      phrase.forEach(function (n, i) {
+        if (i > 0) {
+          o.frequency.setTargetAtTime(hz(n[0]), at, 0.06); o2.frequency.setTargetAtTime(hz(n[0]), at, 0.06);
+          g.gain.setTargetAtTime(0.11, at - 0.05, 0.03); g.gain.setTargetAtTime(0.16, at + 0.05, 0.08);
+        }
+        at += n[1] * BEAT;
+      });
+      g.gain.setTargetAtTime(0.0001, at - 0.6, 0.25);
+      o.connect(g); o2.connect(mix); mix.connect(g); out(g, 0.9);
+      [o, o2, vib].forEach(function (x) { x.start(t); x.stop(at + 0.5); });
+    }
+    /* music-box twinkles */
+    function bell(t, m, vol) {
+      var o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = "triangle"; o.frequency.value = hz(m);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol || 0.07, t + 0.008);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 1.6);
+      o.connect(g); out(g, 1); o.start(t); o.stop(t + 1.7);
+    }
+
+    /* one 40-beat cycle: two lead phrases, then a music-box interlude */
+    var PHRASE_A = [[74, 3], [73, 1], [74, 2], [69, 4], [70, 2], [69, 4]];
+    var PHRASE_B = [[65, 3], [64, 1], [65, 2], [62, 4], [67, 2], [69, 4]];
+    var BOX = [86, 89, 93, 89, 86, 89, 94, 93, 86, 89, 93, 89, 85, 88, 93, 88];
+    function cycle(t0) {
+      for (var b = 0; b < 40; b += 2) { beat(t0 + b * BEAT, 1); beat(t0 + b * BEAT + 0.24, 0.55); }
+      lead(t0, PHRASE_A);
+      lead(t0 + 16 * BEAT, PHRASE_B);
+      BOX.forEach(function (m, i) { bell(t0 + 32 * BEAT + i * BEAT / 2, m, 0.06); });
+      bell(t0, 86, 0.05); bell(t0 + 16 * BEAT, 81, 0.05);
+    }
+    function loop(t0) {
+      if (!playing) return;
+      cycle(t0);
+      var next = t0 + CYCLE;
+      timers.push(setTimeout(function () { loop(next); }, Math.max(0, (next - ctx.currentTime - 1.5) * 1000)));
+    }
+
+    function start() {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC || playing) return false;
+      try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}
+      try {
+        if (!ctx) ctx = new AC();
+        if (ctx.state === "suspended") ctx.resume();
+        master = ctx.createGain(); master.gain.value = 0.0001;
+        var comp = ctx.createDynamicsCompressor(); master.connect(comp); comp.connect(ctx.destination);
+        dry = ctx.createGain(); dry.gain.value = 0.75; dry.connect(master);
+        verb = ctx.createConvolver(); verb.buffer = impulse(3.4, 2.4);
+        var wet = ctx.createGain(); wet.gain.value = 0.5; verb.connect(wet); wet.connect(master);
+        playing = true; muted = false;
+        master.gain.exponentialRampToValueAtTime(LEVEL, ctx.currentTime + 2.5);
+        drone(); wind();
+        loop(ctx.currentTime + 0.8);
+        return true;
+      } catch (e) { playing = false; return false; }
+    }
+    function stop(fade) {
+      if (!playing || !ctx) return;
+      playing = false;
+      timers.forEach(clearTimeout); timers = [];
+      var t = ctx.currentTime, m = master;
+      m.gain.cancelScheduledValues(t); m.gain.setValueAtTime(Math.max(m.gain.value, 0.0001), t);
+      m.gain.exponentialRampToValueAtTime(0.0001, t + (fade || 1.5));
+      var old = sources; sources = [];
+      setTimeout(function () {
+        old.forEach(function (s) { try { s.stop(); } catch (e) {} });
+        try { m.disconnect(); } catch (e) {}
+      }, ((fade || 1.5) + 0.2) * 1000);
+    }
+    function setMuted(on) {
+      if (!playing || !ctx) return;
+      muted = on;
+      var t = ctx.currentTime;
+      master.gain.cancelScheduledValues(t); master.gain.setValueAtTime(Math.max(master.gain.value, 0.0001), t);
+      master.gain.exponentialRampToValueAtTime(on ? 0.0001 : LEVEL, t + 0.4);
+    }
+    /* a short spooky flourish for bingo, only if sound was switched on earlier */
+    function sting() {
+      if (!ctx || ctx.state !== "running") return;
+      if (!master || !playing) {
+        master = ctx.createGain(); master.gain.value = 0.7; master.connect(ctx.destination);
+        dry = ctx.createGain(); dry.gain.value = 1; dry.connect(master);
+        verb = ctx.createConvolver(); verb.buffer = impulse(2.5, 2.4);
+        var wet = ctx.createGain(); wet.gain.value = 0.5; verb.connect(wet); wet.connect(master);
+      }
+      var t = ctx.currentTime + 0.05;
+      [74, 77, 80, 83, 86].forEach(function (m, i) { bell(t + i * 0.09, m, 0.09); });
+      bell(t + 0.55, 98, 0.06);
+    }
+    return { start: start, stop: stop, setMuted: setMuted, sting: sting,
+             isPlaying: function () { return playing; }, isMuted: function () { return muted; } };
+  })();
+
   /* ---------- opening scene ---------- */
   var intro = $("intro");
   function openIntro() {
+    Music.stop(0.3);
     intro.classList.remove("leaving", "ff");
+    $("intro-gate").hidden = false; $("intro-gate").classList.remove("leaving");
+    $("intro-inner").hidden = true;
+    $("intro-sound").hidden = true;
     intro.hidden = false;
     intro.scrollTop = 0;
-    Array.prototype.forEach.call(intro.querySelectorAll(".rv, .bat"), function (el) {
+    Array.prototype.forEach.call(intro.querySelectorAll(".i-gate, .bat"), function (el) {
       el.style.animation = "none"; void el.offsetWidth; el.style.animation = "";
     });
   }
+  function enterIntro(withSound) {
+    var gate = $("intro-gate");
+    if (withSound && Music.start()) {
+      $("intro-sound").hidden = false;
+      $("intro-sound").setAttribute("aria-pressed", "false");
+      $("intro-sound").setAttribute("aria-label", "Mute the music");
+    }
+    gate.classList.add("leaving");
+    setTimeout(function () {
+      gate.hidden = true;
+      $("intro-inner").hidden = false;
+      intro.scrollTop = 0;
+    }, 550);
+  }
+  $("enter-sound").addEventListener("click", function () { enterIntro(true); });
+  $("enter-quiet").addEventListener("click", function () { enterIntro(false); });
+  $("intro-sound").addEventListener("click", function () {
+    var mute = !Music.isMuted();
+    Music.setMuted(mute);
+    this.setAttribute("aria-pressed", mute ? "true" : "false");
+    this.setAttribute("aria-label", mute ? "Play the music" : "Mute the music");
+    this.style.opacity = mute ? ".55" : "1";
+  });
   function closeIntro(withLocation) {
     store("hw2026-intro-seen", "1");
+    Music.stop(2.2);
     if (withLocation) startLocation();
     intro.classList.add("leaving");
     setTimeout(function () { intro.hidden = true; intro.classList.remove("leaving", "ff"); if (map) map.resize(); }, 760);
   }
-  intro.addEventListener("click", function (ev) { if (!ev.target.closest("button")) intro.classList.add("ff"); });
+  intro.addEventListener("click", function (ev) { if (!ev.target.closest("button") && $("intro-gate").hidden) intro.classList.add("ff"); });
   $("intro-begin").addEventListener("click", function () { closeIntro(true); });
   $("intro-skip").addEventListener("click", function () { closeIntro(false); });
   $("replay-intro").addEventListener("click", openIntro);
@@ -1229,6 +1433,7 @@ h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 3
       el.style.animation = "none"; void el.offsetWidth; el.style.animation = "";
     });
     if (navigator.vibrate) { try { navigator.vibrate([80, 40, 80, 40, 160]); } catch (e) {} }
+    Music.sting();
     $("cheer-ok").focus();
   }
   $("cheer-ok").addEventListener("click", function () { $("cheer").hidden = true; });
