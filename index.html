@@ -1,0 +1,908 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#16111b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Halloween Walk">
+<meta name="description" content="Live map of our Halloween night walk: Kensington’s decorated houses, the Playful Park of Peculiar, then Notting Hill’s crescents.">
+<meta property="og:title" content="Halloween Night Walk">
+<meta property="og:description" content="Kensington’s decorated houses, the Playful Park of Peculiar, then Notting Hill’s crescents. Saturday 31 October.">
+<title>Halloween Night Walk</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Pirata+One&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<style>
+/* One-screen app: map pinned on top, a live next-stop bar, a scrolling trail of stop cards below. Single dark look for walking at night. */
+:root {
+  --night: #16111b;
+  --card: #211a28;
+  --card-2: #2a2133;
+  --line: #3b3045;
+  --bone: #f0e6d4;
+  --mist: #ab9fb6;
+  --pumpkin: #f28a2e;
+  --pumpkin-ink: #1d1206;
+  --violet: #b98cff;
+  --violet-ink: #1a1026;
+  --candle: #ffd47e;
+  --moss: #8fbf8a;
+  --moss-ink: #10180f;
+  --you: #4da3ff;
+  --alarm: #ff6b4a;
+  --font-display: "Pirata One", Georgia, serif;
+  --font-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; margin: 0; }
+body {
+  background: var(--night); color: var(--bone);
+  font-family: var(--font-body); font-size: 16px; line-height: 1.45;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+button { font: inherit; }
+a { color: var(--candle); }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--candle); outline-offset: 2px; }
+
+.app { height: 100%; display: flex; flex-direction: column; }
+
+/* ---------- header ---------- */
+.top {
+  flex: none; position: relative;
+  padding-top: max(10px, env(safe-area-inset-top, 0px));
+  padding-bottom: 10px;
+  padding-left: max(14px, env(safe-area-inset-left, 0px));
+  padding-right: max(14px, env(safe-area-inset-right, 0px));
+  display: flex; align-items: center; gap: 8px;
+}
+.top h1 {
+  margin: 0 auto 0 0; font-family: var(--font-display); font-weight: 400; font-size: 27px; line-height: 1;
+  color: var(--pumpkin); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
+  text-shadow: 0 0 18px rgba(242,138,46,.3);
+}
+.chip {
+  flex: none; font-size: 13px; font-weight: 700; color: var(--pumpkin);
+  border: 1px solid var(--pumpkin); border-radius: 999px; padding: 5px 10px; white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.chip.urgent { background: var(--alarm); border-color: var(--alarm); color: #1b0703; }
+.chip.calm { color: var(--violet); border-color: var(--violet); }
+.icon-btn {
+  flex: none; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center;
+  border: 1px solid var(--line); background: transparent; color: var(--bone); cursor: pointer; padding: 0;
+}
+.progress { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--line); }
+.progress span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--pumpkin), var(--violet)); transition: width .4s ease; }
+
+/* ---------- map ---------- */
+.map-wrap { position: relative; flex: 0 0 42%; min-height: 220px; transition: flex-basis .25s ease; }
+.app.map-big .map-wrap { flex-basis: 68%; }
+#map { position: absolute; inset: 0; background: #1b1620; }
+.map-btns {
+  position: absolute; z-index: 500; right: max(10px, env(safe-area-inset-right, 0px)); bottom: 26px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.map-btn {
+  width: 46px; height: 46px; border-radius: 13px; cursor: pointer; padding: 0;
+  border: 1px solid var(--line); background: rgba(22,17,27,.92); color: var(--bone);
+  display: grid; place-items: center; box-shadow: 0 4px 14px rgba(0,0,0,.4);
+}
+.map-btn.on { border-color: var(--you); color: var(--you); }
+.legend {
+  position: absolute; z-index: 500; left: max(10px, env(safe-area-inset-left, 0px)); bottom: 26px;
+  display: flex; flex-direction: column; gap: 4px; pointer-events: none;
+}
+.legend span {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: .04em;
+  color: var(--bone); background: rgba(22,17,27,.82); border-radius: 999px; padding: 3px 9px 3px 7px; width: max-content;
+}
+.legend i { width: 14px; height: 4px; border-radius: 2px; display: inline-block; }
+.map-note {
+  position: absolute; z-index: 500; left: max(10px, env(safe-area-inset-left, 0px)); top: 10px; right: 66px;
+  font-size: 12px; color: var(--mist); pointer-events: none;
+}
+.leaflet-container { font-family: var(--font-body); background: #1b1620; }
+.leaflet-control-attribution { background: rgba(22,17,27,.8) !important; color: var(--mist) !important; font-size: 10px; }
+.leaflet-control-attribution a { color: var(--mist) !important; }
+.leaflet-tooltip.hw-tip {
+  background: var(--card-2); color: var(--bone); border: 1px solid var(--line); border-radius: 8px;
+  font: 700 13px/1.2 var(--font-body); padding: 5px 8px; box-shadow: 0 4px 14px rgba(0,0,0,.45);
+}
+.leaflet-tooltip-top.hw-tip::before { border-top-color: var(--line); }
+
+/* markers */
+.pin {
+  position: relative; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+  font: 700 13px/1 var(--font-body); color: var(--pumpkin-ink); background: var(--pumpkin);
+  border: 2px solid var(--night); box-shadow: 0 2px 8px rgba(0,0,0,.55);
+  font-variant-numeric: tabular-nums;
+}
+.pin.leg2 { background: var(--violet); color: var(--violet-ink); }
+.pin.park { background: var(--moss); color: var(--moss-ink); }
+.pin.start { background: var(--bone); color: var(--night); }
+.pin.done { background: #5b5065; color: var(--bone); }
+.pin.next { transform: scale(1.22); border-color: var(--candle); }
+.pin.next::after {
+  content: ""; position: absolute; inset: -6px; border-radius: 50%; border: 2px solid var(--candle);
+  animation: ring 1.8s ease-out infinite;
+}
+@keyframes ring { 0% { transform: scale(.8); opacity: .9; } 100% { transform: scale(1.9); opacity: 0; } }
+.you-dot {
+  position: relative; width: 18px; height: 18px; border-radius: 50%; background: var(--you); border: 3px solid #fff;
+  box-shadow: 0 1px 6px rgba(0,0,0,.5);
+}
+.you-dot::after {
+  content: ""; position: absolute; inset: -9px; border-radius: 50%; background: rgba(77,163,255,.35);
+  animation: ring 2s ease-out infinite; z-index: -1;
+}
+
+/* ---------- next-stop bar ---------- */
+.nextbar {
+  flex: none; background: var(--card);
+  border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  padding-block: 10px;
+  padding-left: max(14px, env(safe-area-inset-left, 0px));
+  padding-right: max(14px, env(safe-area-inset-right, 0px));
+  display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center;
+}
+.nextbar.urgent { background: #3a1d17; border-color: var(--alarm); }
+.nextbar .left { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.nb-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.nb-eyebrow { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--candle); font-weight: 700; }
+.nextbar.urgent .nb-eyebrow { color: var(--alarm); }
+.pill {
+  font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 999px; white-space: nowrap;
+  background: rgba(143,191,138,.16); color: var(--moss);
+}
+.pill.late { background: rgba(255,107,74,.16); color: var(--alarm); }
+.nb-name { font-weight: 700; font-size: 17px; line-height: 1.25; }
+.nb-meta { font-size: 14px; color: var(--mist); font-variant-numeric: tabular-nums; display: flex; align-items: center; gap: 6px; }
+.arrow { flex: none; width: 18px; height: 18px; color: var(--candle); transition: transform .3s ease; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 40px; padding: 6px 14px; border-radius: 999px; cursor: pointer; text-decoration: none;
+  font: 700 14px/1.1 var(--font-body); border: 1.5px solid var(--line); background: transparent; color: var(--bone);
+}
+.btn.go { color: var(--candle); border-color: rgba(255,212,126,.45); }
+.btn.solid { background: var(--pumpkin); border-color: var(--pumpkin); color: var(--pumpkin-ink); }
+.btn.seen[aria-pressed="true"] { background: var(--moss); border-color: var(--moss); color: var(--moss-ink); }
+.btn.blue { border-color: var(--you); color: var(--you); }
+.btn.blue[aria-pressed="true"] { background: var(--you); color: #071526; }
+
+/* ---------- list ---------- */
+.list {
+  flex: 1 1 auto; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+  padding-top: 18px;
+  padding-bottom: max(28px, env(safe-area-inset-bottom, 0px));
+  padding-left: max(14px, env(safe-area-inset-left, 0px));
+  padding-right: max(14px, env(safe-area-inset-right, 0px));
+}
+.list-inner { max-width: 620px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+.setup {
+  display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 14px;
+  border: 1px solid rgba(77,163,255,.45); background: rgba(77,163,255,.07);
+}
+.setup p { margin: 0; font-size: 14px; }
+.setup .row { display: flex; gap: 8px; flex-wrap: wrap; }
+.alert {
+  display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; align-items: baseline;
+  padding: 12px 14px; border: 1px solid var(--pumpkin); border-radius: 12px; background: rgba(242,138,46,.08);
+}
+.alert .t { font-size: 20px; font-weight: 700; color: var(--pumpkin); font-variant-numeric: tabular-nums; }
+.alert p { margin: 0; font-size: 15px; min-width: 0; }
+
+section { display: flex; flex-direction: column; gap: 12px; }
+.sec-when { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--pumpkin); font-weight: 700; font-variant-numeric: tabular-nums; }
+.sec-when.leg2 { color: var(--violet); }
+.sec-when.park { color: var(--moss); }
+.sec-when.plain { color: var(--candle); }
+h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 31px; line-height: 1.05; text-wrap: balance; }
+.sec-sub { margin: 0; font-size: 14px; color: var(--mist); }
+.route-btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 10px 14px;
+  border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 15px; text-align: center;
+  border: 1.5px solid var(--line); color: var(--bone); background: var(--card);
+}
+
+.stops { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.stop {
+  border: 1px solid var(--line); border-radius: 14px; background: var(--card);
+  padding: 12px; display: grid; grid-template-columns: 30px 1fr; gap: 10px;
+  scroll-margin-top: 10px; transition: border-color .2s ease, opacity .2s ease;
+}
+.stop.next { border-color: var(--candle); box-shadow: 0 0 0 1px rgba(255,212,126,.3); }
+.stop.here { border-color: var(--you); box-shadow: 0 0 0 1px rgba(77,163,255,.5); }
+.stop.done { opacity: .62; }
+.num {
+  width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; margin-top: 1px;
+  font-weight: 700; font-size: 13px; background: var(--pumpkin); color: var(--pumpkin-ink);
+  font-variant-numeric: tabular-nums;
+}
+.stop.leg2 .num { background: var(--violet); color: var(--violet-ink); }
+.stop.park .num { background: var(--moss); color: var(--moss-ink); }
+.stop.done .num { background: #5b5065; color: var(--bone); }
+.s-body { min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.s-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.s-time { font-size: 14px; font-weight: 700; color: var(--candle); font-variant-numeric: tabular-nums; }
+.s-name { margin: 0; font-size: 18px; line-height: 1.25; font-weight: 700; }
+.badge {
+  font-size: 11px; letter-spacing: .08em; text-transform: uppercase; padding: 2px 7px; border-radius: 999px;
+  background: rgba(255,212,126,.15); color: var(--candle); font-weight: 700;
+}
+.badge.here { background: rgba(77,163,255,.18); color: var(--you); }
+.s-p { margin: 0; font-size: 15px; }
+.s-p.where { color: var(--mist); }
+.lbl { display: block; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--pumpkin); font-weight: 700; }
+.leg2 .lbl { color: var(--violet); }
+.park .lbl { color: var(--moss); }
+.where .lbl { color: var(--mist); }
+.s-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+
+.park-card { border: 1px solid var(--line); border-radius: 14px; background: var(--card-2); padding: 14px; }
+.park-card ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: 15px; }
+
+.picks { display: flex; flex-direction: column; gap: 10px; }
+.pick { border: 1px solid var(--line); border-radius: 14px; background: var(--card); padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
+.pick h3 { margin: 0; font-size: 17px; }
+.pick p { margin: 0; font-size: 14px; color: var(--mist); }
+.pick .btn { align-self: flex-start; }
+
+.notes ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: var(--mist); }
+.small { font-size: 12px; color: var(--mist); margin: 0; }
+.linkbtn { background: none; border: 0; padding: 0; color: var(--mist); text-decoration: underline; cursor: pointer; font-size: 14px; align-self: flex-start; }
+
+/* ---------- arrival sheet + toast ---------- */
+.arrive {
+  position: fixed; z-index: 1000; left: 0; right: 0; bottom: 0;
+  padding-top: 16px;
+  padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  background: var(--card-2); border-top: 2px solid var(--you); border-radius: 18px 18px 0 0;
+  box-shadow: 0 -10px 30px rgba(0,0,0,.55);
+  display: flex; flex-direction: column; gap: 8px;
+  animation: rise .25s ease-out;
+}
+@keyframes rise { from { transform: translateY(30px); opacity: 0; } to { transform: none; opacity: 1; } }
+.arrive .eyebrow { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--you); font-weight: 700; }
+.arrive h3 { margin: 0; font-size: 23px; line-height: 1.2; }
+.arrive p { margin: 0; font-size: 15px; }
+.arrive .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+#arr-seen { background: var(--moss); border-color: var(--moss); color: var(--moss-ink); min-width: 120px; }
+
+.toast {
+  position: fixed; z-index: 1001; left: 50%; transform: translateX(-50%);
+  bottom: max(16px, env(safe-area-inset-bottom, 0px)); width: max-content; max-width: calc(100% - 32px);
+  background: var(--card-2); color: var(--bone); border: 1px solid var(--line); border-radius: 12px;
+  padding: 10px 14px; font-size: 14px; box-shadow: 0 6px 20px rgba(0,0,0,.45);
+}
+
+@media (min-width: 900px) {
+  .app { display: grid; grid-template-columns: 1fr 440px; grid-template-rows: auto auto 1fr; }
+  .top { grid-column: 1 / -1; }
+  .map-wrap { grid-column: 1; grid-row: 2 / 4; min-height: 0; }
+  .nextbar { grid-column: 2; grid-row: 2; }
+  .list { grid-column: 2; grid-row: 3; min-height: 0; }
+  #btn-big { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <header class="top">
+    <h1>Halloween Walk</h1>
+    <span class="chip" id="chip">Park 7pm</span>
+    <button type="button" class="icon-btn" id="btn-share" aria-label="Share this map with your group">
+      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 3v12M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>
+    </button>
+    <div class="progress" role="progressbar" aria-label="Stops seen" aria-valuemin="0" aria-valuemax="16" aria-valuenow="0" id="progress"><span id="progress-bar"></span></div>
+  </header>
+
+  <div class="map-wrap">
+    <div id="map" role="region" aria-label="Map of the walk"></div>
+    <div class="map-note" id="map-note"></div>
+    <div class="legend" aria-hidden="true">
+      <span><i style="background:var(--pumpkin)"></i>Before the park</span>
+      <span><i style="background:var(--violet)"></i>After the park</span>
+    </div>
+    <div class="map-btns">
+      <button type="button" class="map-btn" id="btn-me" aria-pressed="false" aria-label="Follow my location">
+        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="currentColor"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+      </button>
+      <button type="button" class="map-btn" id="btn-fit" aria-label="Show the whole route">
+        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+      </button>
+      <button type="button" class="map-btn" id="btn-big" aria-pressed="false" aria-label="Make the map bigger">
+        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path id="big-icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M7 10l5 5 5-5"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="nextbar" id="nextbar" aria-live="polite">
+    <div class="left">
+      <span class="nb-eyebrow" id="nb-eyebrow">Next stop</span>
+      <span class="nb-name" id="nb-name"></span>
+      <span class="nb-meta"><svg class="arrow" id="nb-arrow" viewBox="0 0 24 24" aria-hidden="true" hidden><path fill="currentColor" d="M12 2l7 18-7-4-7 4z"/></svg><span id="nb-meta"></span></span>
+    </div>
+    <a class="btn go" id="nb-go" href="#" target="_blank" rel="noopener">Directions</a>
+  </div>
+
+  <main class="list" id="list">
+    <div class="list-inner">
+      <div class="setup" id="setup">
+        <p id="setup-text">Turn on your location to see yourself on the map, get distances to each stop, and a pop-up when you arrive.</p>
+        <div class="row">
+          <button type="button" class="btn blue" id="btn-locate">Show my location</button>
+          <button type="button" class="btn blue" id="btn-wake" aria-pressed="false" hidden>Keep screen on</button>
+        </div>
+      </div>
+
+      <div class="alert">
+        <span class="t">6:55pm</span>
+        <p>Be at the Holland Park gates on Kensington High Street. 7pm is the last entry slot. Don’t arrive more than 5 minutes early.</p>
+      </div>
+
+      <section id="sec-leg1">
+        <span class="sec-when">Route 1 · Before the park</span>
+        <h2>Kensington’s showpiece houses</h2>
+        <p class="sec-sub">Start at High Street Kensington tube. About 3 km, so roughly 40 minutes of walking. Setting off around 4:45 leaves plenty of time to stroll.</p>
+        <a class="route-btn" id="route1" target="_blank" rel="noopener" href="#">Open Route 1 in Google Maps</a>
+        <ol class="stops" id="stops-leg1"></ol>
+      </section>
+
+      <section id="sec-park">
+        <span class="sec-when park">Your 7pm booking</span>
+        <h2>The Playful Park of Peculiar</h2>
+        <div class="park-card">
+          <ul>
+            <li>Have your booking email open. The queue forms just inside the main gates.</li>
+            <li>The one-way trail takes about 30 minutes. Food and drink stalls are near the end.</li>
+            <li>No toilets in the park. The Design Museum next to the gate is the nearest.</li>
+            <li>You leave at the top of the park, at the end of the cycle path. Route 2 starts there.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="sec-leg2">
+        <span class="sec-when leg2">Route 2 · After the park</span>
+        <h2>Notting Hill’s crescents</h2>
+        <p class="sec-sub">From the park exit to dinner. About 3.3 km, so 40-odd minutes of walking at an easy pace.</p>
+        <a class="route-btn" id="route2" target="_blank" rel="noopener" href="#">Open Route 2 in Google Maps</a>
+        <ol class="stops" id="stops-leg2"></ol>
+      </section>
+
+      <section>
+        <span class="sec-when plain">After dinner</span>
+        <h2>A nightcap nearby</h2>
+        <div class="picks">
+          <div class="pick">
+            <h3>The Churchill Arms</h3>
+            <p>Autumn display outside, Thai food inside, on Kensington Church Street.</p>
+            <a class="btn go" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&amp;destination=The%20Churchill%20Arms%2C%20119%20Kensington%20Church%20Street%2C%20London%20W8%207LN&amp;travelmode=walking">Directions</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="notes">
+        <h2>Before you go</h2>
+        <ul>
+          <li>Dry tonight, but down to about 6°C. Warm layers and comfy shoes.</li>
+          <li>These are people’s homes. Enjoy the displays from the pavement.</li>
+          <li>Your location stays on your phone. Nobody else in the group can see where you are.</li>
+          <li>On iPhone, tap Share then Add to Home Screen to open this like an app.</li>
+          <li>Displays can change on the night, so keep an eye out on the streets in between.</li>
+        </ul>
+        <button type="button" class="linkbtn" id="reset">Clear all ticks</button>
+        <p class="small">Displays from Claire &amp; The City’s 2026 guide, Londonist’s 22 October walk and Instagram walk posts. Park details from Kensington’s Halloween FAQ. Map © OpenStreetMap contributors © CARTO. Walking routes from FOSSGIS / OSRM.</p>
+      </section>
+    </div>
+  </main>
+</div>
+
+<div class="arrive" id="arrive" hidden role="dialog" aria-labelledby="arr-name">
+  <span class="eyebrow">You’ve arrived</span>
+  <h3 id="arr-name"></h3>
+  <p id="arr-look"></p>
+  <div class="row">
+    <button type="button" class="btn seen" id="arr-seen" aria-pressed="false">Seen it</button>
+    <button type="button" class="btn" id="arr-close">Close</button>
+  </div>
+</div>
+<div class="toast" id="toast" hidden role="status"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var ROUTE1_URL = "https://www.google.com/maps/dir/?api=1&origin=High%20Street%20Kensington%20Station,%20London%20W8&destination=51.49913,-0.1987634&travelmode=walking&waypoints=Kensington%20Square,%20London%20W8%7CVictoria%20Road,%20London%20W8%7CArgyll%20Road,%20London%20W8%7CPhillimore%20Place,%20London%20W8%7CUpper%20Phillimore%20Gardens,%20London%20W8%7CPhillimore%20Gardens,%20London%20W8%7CIlchester%20Place,%20London%20W14";
+  var ROUTE2_URL = "https://www.google.com/maps/dir/?api=1&origin=51.5069295,-0.2033785&destination=Los%20Mochis,%202-4%20Farmer%20Street,%20London%20W8%207SN&travelmode=walking&waypoints=Holland%20Park%20Mews,%20London%20W11%7CClarendon%20Road,%20London%20W11%7CLansdowne%20Crescent,%20London%20W11%7CElgin%20Crescent,%20London%20W11%7CDuke%20of%20Wellington,%20179%20Portobello%20Road,%20London%20W11%202ED%7CAlice%27s,%2086%20Portobello%20Road,%20London%20W11%202QD%7CPembridge%20Road,%20London%20W11";
+
+  var START = { id: "start", n: "S", leg: 1, name: "High Street Kensington tube", lat: 51.5008834, lng: -0.1926463 };
+
+  var STOPS = [
+    { id: "kensq", n: 1, leg: 1, time: "4:50", name: "Kensington Square", lat: 51.5003054, lng: -0.1898798, r: 80,
+      look: "An enchanted autumn garden display, new this year.",
+      where: "You reach a railed garden square, a couple of minutes south of the tube." },
+    { id: "victoria", n: 2, leg: 1, time: "5:05", name: "Victoria Road", lat: 51.4998724, lng: -0.1858819, r: 110,
+      look: "A fairy garden and a Red Riding Hood display this year. Past years brought mummies, skeletons and a Beetlejuice house.",
+      where: "You’re on a wide road of grand detached houses, east of Kensington Square." },
+    { id: "argyll", n: 3, leg: 1, time: "5:25", name: "Argyll Road", lat: 51.5011949, lng: -0.1962523, r: 90,
+      look: "Sugar skulls and cobwebs behind black railings.",
+      where: "You’ve crossed back over the High Street and turned north, just west of the station." },
+    { id: "phplace", n: 4, leg: 1, time: "5:40", name: "Phillimore Place", lat: 51.5014588, lng: -0.1981369, r: 70,
+      look: "One of the ‘best decorated houses’ picks from the Instagram lists.",
+      where: "You’re on the short street between Argyll Road and Phillimore Gardens." },
+    { id: "upperph", n: 5, leg: 1, time: "5:50", name: "Upper Phillimore Gardens", lat: 51.5020738, lng: -0.198238, r: 80,
+      look: "The ‘favourite haunted house’ from the Instagram post, with an arch of pumpkins.",
+      where: "You’re at the northern, top end of the Phillimore streets." },
+    { id: "phgdns", n: 6, leg: 1, time: "6:05", name: "Phillimore Gardens", lat: 51.5010643, lng: -0.1989751, r: 90,
+      look: "Witches, grim reapers, pumpkin-lined stairs and a giant witch display. Huge white houses with the biggest porches of the night.",
+      where: "You’re walking south among the crowds of trick-or-treaters, back towards the High Street." },
+    { id: "ilchester", n: 7, leg: 1, time: "6:25", name: "Ilchester Place", lat: 51.5001781, lng: -0.2044599, r: 90,
+      look: "A red-brick house with a round window and a black door, with skeletons climbing a huge pile of autumn leaves. Count the skeletons.",
+      where: "You’ve walked about 10 minutes west, past the Design Museum, along the park’s southern edge." },
+    { id: "gate", n: 8, leg: 0, time: "6:55", name: "Holland Park gates", lat: 51.49913, lng: -0.1987634, r: 50,
+      look: "Your 7pm Playful Park of Peculiar slot. The queue forms just inside the gates.",
+      where: "You’re at the park gates on Kensington High Street (W8 7RG), near the Design Museum." },
+    { id: "exit", n: 9, leg: 0, time: "7:35", name: "Park exit, top of Holland Walk", lat: 51.5069295, lng: -0.2033785, r: 60,
+      look: "Start Route 2 from here.",
+      where: "You leave the park at the end of the cycle path, on Holland Park Avenue, a minute from Holland Park tube." },
+    { id: "hpark", n: 10, leg: 2, time: "7:40", name: "Holland Park (the street)", lat: 51.5058019, lng: -0.2063822, r: 110,
+      look: "Iron canopies over doorsteps, tiled paths, and a haunted house with a ‘keep out’ warning. White villas with black-and-white porches.",
+      where: "You’re among the big villas around Holland Park Mews, just south of the Avenue." },
+    { id: "clarendon", n: 11, leg: 2, time: "7:55", name: "Clarendon Road", lat: 51.5105478, lng: -0.2095372, r: 120,
+      look: "Elegant front doors with playful Halloween twists, including a glossy red door with a big autumn wreath.",
+      where: "You’re heading north up a long residential road off Holland Park Avenue." },
+    { id: "lansdowne", n: 12, leg: 2, time: "8:05", name: "Lansdowne Crescent", lat: 51.5116413, lng: -0.2075567, r: 90,
+      look: "A curving crescent of stucco houses that goes big for Halloween.",
+      where: "The road bends round in a gentle arc east of Clarendon Road." },
+    { id: "elgin", n: 13, leg: 2, time: "8:15", name: "Elgin Crescent", lat: 51.5141359, lng: -0.208093, r: 130,
+      look: "Pastel houses with almost every one decorated. This year’s centrepiece is the ‘Black Widow Sweet Shop’. Past years had giant skeleton heads in the leaves.",
+      where: "You’re walking east along it, towards Portobello Road." },
+    { id: "duke", n: 14, leg: 2, time: "8:30", name: "Duke of Wellington pub", lat: 51.5151785, lng: -0.2047727, r: 45,
+      look: "Turn right here, down Portobello Road.",
+      where: "You hit the pub where Elgin Crescent meets Portobello Road." },
+    { id: "alices", n: 15, leg: 2, time: "8:40", name: "Portobello Road to Notting Hill Gate", lat: 51.5127724, lng: -0.2019176, r: 60,
+      look: "Halloween shop windows along the way.",
+      where: "You pass Alice’s, the red antiques shop at no. 86. Keep going, then follow Pembridge Road down to Notting Hill Gate." },
+    { id: "dinner", n: 16, leg: 2, time: "8:55", name: "Los Mochis, Farmer Street", lat: 51.5085267, lng: -0.1971206, r: 45,
+      look: "Day of the Dead decorations and a DJ tonight. Book ahead.",
+      where: "You’re on Farmer Street, just south of Notting Hill Gate tube.",
+      book: "https://www.losmochis.co.uk/nh/notting-hill" }
+  ];
+  var BY_ID = {};
+  STOPS.forEach(function (s, i) { s.idx = i; BY_ID[s.id] = s; });
+
+  var LEGS = {
+    leg1: { color: "#f28a2e", pts: [START].concat(STOPS.filter(function (s) { return s.leg === 1; }), [BY_ID.gate]) },
+    park: { color: "#8fbf8a", pts: [BY_ID.gate, BY_ID.exit], straight: true },
+    leg2: { color: "#b98cff", pts: [BY_ID.exit].concat(STOPS.filter(function (s) { return s.leg === 2; })) }
+  };
+  var GATE_MINS = 18 * 60 + 55, LAST_ENTRY = 19 * 60;
+
+  /* ---------- helpers ---------- */
+  function $(id) { return document.getElementById(id); }
+  function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+  function dirUrl(s) { return "https://www.google.com/maps/dir/?api=1&destination=" + s.lat + "," + s.lng + "&travelmode=walking"; }
+  function dist(aLat, aLng, bLat, bLng) {
+    var R = 6371000, r = Math.PI / 180, dLat = (bLat - aLat) * r, dLng = (bLng - aLng) * r;
+    var h = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(aLat * r) * Math.cos(bLat * r) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    return 2 * R * Math.asin(Math.sqrt(h));
+  }
+  function bearing(aLat, aLng, bLat, bLng) {
+    var r = Math.PI / 180;
+    var y = Math.sin((bLng - aLng) * r) * Math.cos(bLat * r);
+    var x = Math.cos(aLat * r) * Math.sin(bLat * r) - Math.sin(aLat * r) * Math.cos(bLat * r) * Math.cos((bLng - aLng) * r);
+    return (Math.atan2(y, x) / r + 360) % 360;
+  }
+  function compass(deg) { return ["north", "north-east", "east", "south-east", "south", "south-west", "west", "north-west"][Math.round(deg / 45) % 8]; }
+  function fmtDist(m) { return m < 1000 ? (Math.round(m / 10) * 10) + " m" : (m / 1000).toFixed(1) + " km"; }
+  function walkMins(m) { return Math.max(1, Math.round(m * 1.25 / 80)); }   /* 1.25 = streets aren’t straight lines */
+  function fmtSpan(mins) {
+    if (mins < 60) return mins + " min";
+    var h = Math.floor(mins / 60), m = mins % 60;
+    return h + "h " + (m < 10 ? "0" : "") + m + "m";
+  }
+  function legClass(s) { return s.leg === 2 ? "leg2" : (s.leg === 0 ? "park" : ""); }
+  var toastTimer = null;
+  function toast(msg) {
+    var t = $("toast"); t.textContent = msg; t.hidden = false;
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.hidden = true; }, 4200);
+  }
+
+  /* ---------- clock (tonight only) ---------- */
+  var override = (location.search.match(/[?&]t=(\d{3,4})/) || [])[1];
+  function nowMins() {
+    if (override) { var v = +override; return Math.floor(v / 100) * 60 + v % 100; }
+    var d = new Date();
+    if (d.getFullYear() !== 2026 || d.getMonth() !== 9 || d.getDate() !== 31) return null;
+    return d.getHours() * 60 + d.getMinutes();
+  }
+
+  /* ---------- state ---------- */
+  var seen = {};
+  try { seen = JSON.parse(store("hw2026-site-seen") || "{}") || {}; } catch (e) { seen = {}; }
+  function saveSeen() { store("hw2026-site-seen", JSON.stringify(seen)); }
+  var here = null, lastPos = null, follow = false, watchId = null, announced = {};
+
+  function nextStop() {
+    var last = -1, i;
+    for (i = 0; i < STOPS.length; i++) if (seen[STOPS[i].id]) last = i;
+    for (i = last + 1; i < STOPS.length; i++) if (!seen[STOPS[i].id]) return STOPS[i];
+    for (i = 0; i < STOPS.length; i++) if (!seen[STOPS[i].id]) return STOPS[i];
+    return null;
+  }
+  function minsToGate() {
+    var g = BY_ID.gate;
+    return lastPos ? walkMins(dist(lastPos.lat, lastPos.lng, g.lat, g.lng)) : 12;
+  }
+  /* Is it time to drop everything and head for the 7pm slot? */
+  function gateRush() {
+    var now = nowMins();
+    if (now === null || seen.gate || seen.exit || now >= LAST_ENTRY + 5 || now < 16 * 60) return false;
+    var leaveBy = GATE_MINS - minsToGate() - 3;
+    return now >= leaveBy - 8;
+  }
+  function target() { return gateRush() ? BY_ID.gate : nextStop(); }
+
+  /* ---------- list ---------- */
+  function buildCard(s) {
+    var li = document.createElement("li");
+    li.className = "stop " + legClass(s);
+    li.id = "stop-" + s.id;
+    li.innerHTML =
+      '<span class="num"></span>' +
+      '<div class="s-body">' +
+        '<div class="s-head"><h3 class="s-name"></h3><span class="badge" hidden></span></div>' +
+        '<p class="s-p look"><span class="lbl">Look for</span><span class="t-look"></span></p>' +
+        '<p class="s-p where"><span class="lbl">You’re there when</span><span class="t-where"></span></p>' +
+        '<div class="s-actions">' +
+          '<button type="button" class="btn show">Show on map</button>' +
+          '<a class="btn go" target="_blank" rel="noopener">Directions</a>' +
+          '<button type="button" class="btn seen" aria-pressed="false">Seen it</button>' +
+        '</div>' +
+      '</div>';
+    li.querySelector(".num").textContent = s.n;
+    li.querySelector(".s-name").textContent = s.name;
+    li.querySelector(".t-look").textContent = s.look;
+    li.querySelector(".t-where").textContent = s.where;
+    li.querySelector(".go").href = dirUrl(s);
+    if (s.book) {
+      var a = document.createElement("a");
+      a.className = "btn solid"; a.target = "_blank"; a.rel = "noopener"; a.href = s.book; a.textContent = "Book a table";
+      li.querySelector(".s-actions").insertBefore(a, li.querySelector(".seen"));
+    }
+    li.querySelector(".show").addEventListener("click", function () { focusStop(s); });
+    li.querySelector(".seen").addEventListener("click", function () { toggleSeen(s.id); });
+    return li;
+  }
+  STOPS.forEach(function (s) {
+    var list = (s.leg === 2 || s.id === "exit") ? $("stops-leg2") : $("stops-leg1");
+    list.appendChild(buildCard(s));
+  });
+  $("route1").href = ROUTE1_URL;
+  $("route2").href = ROUTE2_URL;
+
+  /* ---------- map ---------- */
+  var map = null, markers = {}, youMarker = null, youCircle = null, routeBounds = null;
+  if (typeof window.L !== "undefined") {
+    map = L.map("map", { zoomControl: false, attributionControl: true });
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+      subdomains: "abcd", maxZoom: 20,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+    }).addTo(map);
+
+    markers.start = L.marker([START.lat, START.lng], { icon: pinIcon(START, ""), title: START.name }).addTo(map);
+    markers.start.bindTooltip("Start: " + START.name, { direction: "top", offset: [0, -16], className: "hw-tip" });
+    STOPS.forEach(function (s) {
+      var m = L.marker([s.lat, s.lng], { icon: pinIcon(s, ""), title: s.name, riseOnHover: true }).addTo(map);
+      m.bindTooltip(s.n + " · " + s.name, { direction: "top", offset: [0, -16], className: "hw-tip" });
+      m.on("click", function () {
+        m.openTooltip();
+        if (!$("app").classList.contains("map-big")) scrollToCard(s);
+      });
+      markers[s.id] = m;
+    });
+
+    routeBounds = L.latLngBounds([[START.lat, START.lng]].concat(STOPS.map(function (s) { return [s.lat, s.lng]; })));
+    map.fitBounds(routeBounds, { padding: [28, 28] });
+
+    /* route lines: real walking paths from OpenStreetMap routing, with straight lines until (or unless) they arrive */
+    var lines = {};
+    var drawLine = function (key, latlngs, approx) {
+      if (lines[key]) map.removeLayer(lines[key]);
+      var leg = LEGS[key];
+      lines[key] = L.polyline(latlngs, {
+        color: leg.color, weight: approx ? 3 : 5, opacity: .92, interactive: false,
+        dashArray: (approx || leg.straight) ? "6 8" : null, lineCap: "round", lineJoin: "round"
+      }).addTo(map);
+      lines[key].bringToBack();
+    };
+    Object.keys(LEGS).forEach(function (key) {
+      var leg = LEGS[key];
+      drawLine(key, leg.pts.map(function (p) { return [p.lat, p.lng]; }), !leg.straight);
+      if (leg.straight) return;
+      var cacheKey = "hw2026-route2-" + key, cached = null;
+      try { cached = JSON.parse(store(cacheKey) || "null"); } catch (e) { cached = null; }
+      if (cached && cached.length > 2) { drawLine(key, cached, false); return; }
+      var coords = leg.pts.map(function (p) { return p.lng.toFixed(6) + "," + p.lat.toFixed(6); }).join(";");
+      var url = "https://routing.openstreetmap.de/routed-foot/route/v1/driving/" + coords + "?overview=full&geometries=geojson";
+      var ctrl = ("AbortController" in window) ? new AbortController() : null;
+      var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 9000);
+      fetch(url, ctrl ? { signal: ctrl.signal } : {}).then(function (r) {
+        if (!r.ok) throw new Error("route " + r.status);
+        return r.json();
+      }).then(function (j) {
+        clearTimeout(timer);
+        var c = j && j.routes && j.routes[0] && j.routes[0].geometry && j.routes[0].geometry.coordinates;
+        if (!c || c.length < 2) throw new Error("no route");
+        var ll = c.map(function (p) { return [+p[1].toFixed(6), +p[0].toFixed(6)]; });
+        drawLine(key, ll, false);
+        store(cacheKey, JSON.stringify(ll));
+      }).catch(function () {
+        clearTimeout(timer);
+        $("map-note").textContent = "Dotted lines show the order of stops. Use Directions for turn-by-turn.";
+      });
+    });
+
+    map.on("dragstart", function () { setFollow(false); });
+  } else {
+    $("map").innerHTML = '<p style="padding:16px;color:#ab9fb6;margin:0">The map couldn’t load. Check your signal and reload. The stop list and Directions buttons still work.</p>';
+    $("btn-fit").hidden = true; $("btn-big").hidden = true;
+  }
+
+  function pinIcon(s, extra) {
+    return L.divIcon({
+      className: "", iconSize: [28, 28], iconAnchor: [14, 14],
+      html: '<div class="pin ' + (s === START ? "start" : legClass(s)) + extra + '">' + s.n + "</div>"
+    });
+  }
+  function focusStop(s) {
+    if (!map) return;
+    setFollow(false);
+    map.setView([s.lat, s.lng], 17, { animate: true });
+    if (markers[s.id]) setTimeout(function () { markers[s.id].openTooltip(); }, 300);
+  }
+  function scrollToCard(s) {
+    var el = $("stop-" + s.id);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  $("btn-fit").addEventListener("click", function () {
+    if (!map) return;
+    setFollow(false);
+    map.fitBounds(routeBounds, { padding: [28, 28] });
+  });
+  $("btn-big").addEventListener("click", function () {
+    var big = $("app").classList.toggle("map-big");
+    this.setAttribute("aria-pressed", big ? "true" : "false");
+    this.setAttribute("aria-label", big ? "Make the map smaller" : "Make the map bigger");
+    $("big-icon").setAttribute("d", big ? "M7 14l5-5 5 5" : "M7 10l5 5 5-5");
+    setTimeout(function () { if (map) map.invalidateSize(); }, 280);
+  });
+
+  /* ---------- seen ---------- */
+  function toggleSeen(id) {
+    if (seen[id]) delete seen[id]; else seen[id] = 1;
+    saveSeen(); render();
+  }
+
+  /* ---------- render ---------- */
+  function render() {
+    var nx = nextStop(), tg = target(), count = 0;
+    STOPS.forEach(function (s) {
+      var done = !!seen[s.id];
+      if (done) count++;
+      var li = $("stop-" + s.id);
+      li.classList.toggle("done", done);
+      li.classList.toggle("next", !!tg && tg.id === s.id);
+      li.classList.toggle("here", !!here && here.id === s.id);
+      var b = li.querySelector(".seen");
+      b.setAttribute("aria-pressed", done ? "true" : "false");
+      b.textContent = done ? "✓ Seen" : "Seen it";
+      var badge = li.querySelector(".badge");
+      if (here && here.id === s.id) { badge.hidden = false; badge.className = "badge here"; badge.textContent = "You’re here"; }
+      else if (tg && tg.id === s.id) { badge.hidden = false; badge.className = "badge"; badge.textContent = "Next"; }
+      else badge.hidden = true;
+      if (markers[s.id]) {
+        markers[s.id].setIcon(pinIcon(s, (done ? " done" : "") + (tg && tg.id === s.id ? " next" : "")));
+        markers[s.id].setZIndexOffset(tg && tg.id === s.id ? 1000 : 0);
+      }
+    });
+    $("progress-bar").style.width = (count / STOPS.length * 100) + "%";
+    $("progress").setAttribute("aria-valuenow", String(count));
+    renderNextBar(tg);
+    renderChip();
+  }
+
+  function renderNextBar(tg) {
+    var bar = $("nextbar"), go = $("nb-go"), arrow = $("nb-arrow");
+    var rush = gateRush();
+    bar.classList.toggle("urgent", rush);
+    if (!tg) {
+      $("nb-eyebrow").textContent = "All done";
+      $("nb-name").textContent = "Happy Halloween!";
+      $("nb-meta").textContent = "Every stop ticked off.";
+      go.hidden = true; arrow.hidden = true;
+      return;
+    }
+    go.hidden = false;
+    go.href = dirUrl(tg);
+    var isHere = here && here.id === tg.id;
+    var now = nowMins();
+    var spare = (rush && now !== null) ? GATE_MINS - now - minsToGate() : 0;
+    $("nb-eyebrow").textContent = rush ? (spare > 2 ? "Leave for the gate in " + spare + " min" : "Head to the gate now")
+      : (isHere ? "You’re here" : "Next stop");
+    $("nb-name").textContent = tg.n + "  " + tg.name;
+
+    if (lastPos && !isHere) {
+      var d = dist(lastPos.lat, lastPos.lng, tg.lat, tg.lng);
+      var b = bearing(lastPos.lat, lastPos.lng, tg.lat, tg.lng);
+      arrow.hidden = false;
+      arrow.style.transform = "rotate(" + Math.round(b) + "deg)";
+      $("nb-meta").textContent = fmtDist(d) + " " + compass(b) + " · " + walkMins(d) + " min walk";
+    } else {
+      arrow.hidden = true;
+      $("nb-meta").textContent = isHere ? "Tick it off when you’ve had a look." :
+        (rush ? "Last entry is 7pm. Tap Directions for the quickest way." : "Turn on your location for distances.");
+    }
+  }
+
+  /* The park booking is the only fixed time tonight; the chip counts down to it, then gets out of the way. */
+  function renderChip() {
+    var chip = $("chip"), now = nowMins();
+    chip.className = "chip"; chip.hidden = false;
+    if (seen.gate || seen.exit) { chip.hidden = true; return; }
+    if (now === null) { chip.textContent = "Park 7pm"; return; }
+    if (now >= LAST_ENTRY + 5) { chip.hidden = true; return; }
+    var left = GATE_MINS - now;
+    if (gateRush()) chip.className = "chip urgent";
+    chip.textContent = left > 0 ? "Park gate in " + fmtSpan(left) : (now < LAST_ENTRY ? "Gate now" : "Last entry 7pm");
+  }
+
+  /* ---------- location ---------- */
+  function setFollow(on) {
+    follow = on;
+    $("btn-me").classList.toggle("on", on);
+    $("btn-me").setAttribute("aria-pressed", on ? "true" : "false");
+    if (on && map && lastPos) map.setView([lastPos.lat, lastPos.lng], Math.max(map.getZoom(), 17));
+  }
+  function startLocation() {
+    if (!("geolocation" in navigator)) { toast("This browser can’t share your location."); return; }
+    if (watchId !== null) { setFollow(true); return; }
+    $("btn-locate").textContent = "Finding you…";
+    watchId = navigator.geolocation.watchPosition(onPos, onErr, { enableHighAccuracy: true, maximumAge: 5000, timeout: 30000 });
+    setFollow(true);
+  }
+  function onPos(p) {
+    var first = !lastPos;
+    lastPos = { lat: p.coords.latitude, lng: p.coords.longitude, acc: p.coords.accuracy || 30 };
+    store("hw2026-loc-on", "1");
+    $("btn-locate").hidden = true;
+    $("setup-text").textContent = "Location is on. You’ll get a pop-up as you reach each stop.";
+    if (map) {
+      var ll = [lastPos.lat, lastPos.lng];
+      if (!youMarker) {
+        youCircle = L.circle(ll, { radius: lastPos.acc, color: "#4da3ff", weight: 1, opacity: .4, fillColor: "#4da3ff", fillOpacity: .1, interactive: false }).addTo(map);
+        youMarker = L.marker(ll, { icon: L.divIcon({ className: "", iconSize: [18, 18], iconAnchor: [9, 9], html: '<div class="you-dot"></div>' }), interactive: false, zIndexOffset: 2000 }).addTo(map);
+      } else {
+        youMarker.setLatLng(ll); youCircle.setLatLng(ll); youCircle.setRadius(lastPos.acc);
+      }
+      if (follow) { if (first) map.setView(ll, 17); else map.panTo(ll, { animate: true }); }
+    }
+    checkArrival();
+    render();
+  }
+  function onErr(err) {
+    $("btn-locate").textContent = "Show my location";
+    if (err && err.code === 1) {
+      if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+      watchId = null; setFollow(false);
+      toast("Location is blocked. Allow it for this site in your phone’s settings, or use the Directions buttons.");
+    } else if (!lastPos) {
+      toast("Still looking for your location. It works best outdoors.");
+    }
+  }
+  function checkArrival() {
+    if (!lastPos) return;
+    var best = null, bestD = Infinity;
+    STOPS.forEach(function (s) {
+      var d = dist(lastPos.lat, lastPos.lng, s.lat, s.lng);
+      if (d <= s.r + Math.min(lastPos.acc, 40) && d < bestD) { best = s; bestD = d; }
+    });
+    here = best;
+    if (best && !seen[best.id] && !announced[best.id]) { announced[best.id] = true; showArrival(best); }
+  }
+
+  /* ---------- arrival sheet ---------- */
+  var arrStop = null;
+  function showArrival(s) {
+    arrStop = s;
+    $("arr-name").textContent = s.n + "  " + s.name;
+    $("arr-look").textContent = s.look;
+    $("arr-seen").setAttribute("aria-pressed", "false");
+    $("arr-seen").textContent = "Seen it";
+    $("arrive").hidden = false;
+    if (navigator.vibrate) { try { navigator.vibrate([120, 60, 120]); } catch (e) {} }
+  }
+  $("arr-seen").addEventListener("click", function () {
+    if (arrStop && !seen[arrStop.id]) toggleSeen(arrStop.id);
+    $("arrive").hidden = true;
+    var nx = target();
+    if (nx) {
+      var extra = lastPos ? " · " + fmtDist(dist(lastPos.lat, lastPos.lng, nx.lat, nx.lng)) : "";
+      toast("Next: " + nx.name + extra);
+    }
+  });
+  $("arr-close").addEventListener("click", function () { $("arrive").hidden = true; });
+
+  /* ---------- keep screen on ---------- */
+  var wakeLock = null, wantWake = false;
+  if ("wakeLock" in navigator) $("btn-wake").hidden = false;
+  function renderWake() {
+    var b = $("btn-wake");
+    b.setAttribute("aria-pressed", wakeLock ? "true" : "false");
+    b.textContent = wakeLock ? "✓ Screen stays on" : "Keep screen on";
+  }
+  function requestWake() {
+    navigator.wakeLock.request("screen").then(function (lock) {
+      wakeLock = lock;
+      lock.addEventListener("release", function () { wakeLock = null; renderWake(); });
+      renderWake();
+    }).catch(function () {
+      wantWake = false; renderWake();
+      toast("Your phone didn’t allow keeping the screen on.");
+    });
+  }
+  $("btn-wake").addEventListener("click", function () {
+    if (wakeLock) { wantWake = false; wakeLock.release(); wakeLock = null; renderWake(); return; }
+    wantWake = true; requestWake();
+  });
+  document.addEventListener("visibilitychange", function () {
+    if (wantWake && !wakeLock && document.visibilityState === "visible") requestWake();
+  });
+
+  /* ---------- share ---------- */
+  $("btn-share").addEventListener("click", function () {
+    var data = { title: "Halloween Night Walk", text: "Tonight’s Halloween walk: live map and stops", url: location.href.split("?")[0] };
+    if (navigator.share) { navigator.share(data).catch(function () {}); return; }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(data.url).then(function () { toast("Link copied. Paste it in the group chat."); },
+        function () { toast(data.url); });
+    } else toast(data.url);
+  });
+
+  /* ---------- wiring ---------- */
+  $("btn-locate").addEventListener("click", startLocation);
+  $("btn-me").addEventListener("click", function () { if (watchId === null) startLocation(); else setFollow(!follow); });
+  $("reset").addEventListener("click", function () { seen = {}; announced = {}; saveSeen(); render(); toast("All ticks cleared."); });
+
+  try {
+    if (store("hw2026-loc-on") === "1" && navigator.permissions && navigator.permissions.query) {
+      navigator.permissions.query({ name: "geolocation" }).then(function (st) { if (st.state === "granted") startLocation(); }).catch(function () {});
+    }
+  } catch (e) {}
+
+  render();
+  setInterval(render, 30000);
+  if (map) setTimeout(function () { map.invalidateSize(); }, 200);
+  window.addEventListener("resize", function () { if (map) map.invalidateSize(); });
+})();
+</script>
+</body>
+</html>
